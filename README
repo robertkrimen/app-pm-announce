@@ -1,0 +1,47 @@
+NAME
+    App::PM::Announce -
+
+VERSION
+    Version 0.01
+
+SYNOPSIS
+AUTHOR
+    Robert Krimen, "<rkrimen at cpan.org>"
+
+BUGS
+    Please report any bugs or feature requests to "bug-app-pm-announce at
+    rt.cpan.org", or through the web interface at
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=App-PM-Announce>. I will
+    be notified, and then you'll automatically be notified of progress on
+    your bug as I make changes.
+
+SUPPORT
+    You can find documentation for this module with the perldoc command.
+
+        perldoc App::PM::Announce
+
+    You can also look for information at:
+
+    *   RT: CPAN's request tracker
+
+        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-PM-Announce>
+
+    *   AnnoCPAN: Annotated CPAN documentation
+
+        <http://annocpan.org/dist/App-PM-Announce>
+
+    *   CPAN Ratings
+
+        <http://cpanratings.perl.org/d/App-PM-Announce>
+
+    *   Search CPAN
+
+        <http://search.cpan.org/dist/App-PM-Announce/>
+
+ACKNOWLEDGEMENTS
+COPYRIGHT & LICENSE
+    Copyright 2009 Robert Krimen, all rights reserved.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+

@@ -5,7 +5,7 @@ use strict;
 
 =head1 NAME
 
-App::PM::Announce - The great new App::PM::Announce!
+App::PM::Announce -
 
 =head1 VERSION
 
@@ -18,35 +18,9 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
-    use App::PM::Announce;
-
-    my $foo = App::PM::Announce->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 FUNCTIONS
-
-=head2 function1
-
 =cut
 
-sub function1 {
-}
 
-=head2 function2
-
-=cut
-
-sub function2 {
-}
 
 =head1 AUTHOR
 
