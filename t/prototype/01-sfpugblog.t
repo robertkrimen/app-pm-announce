@@ -11,12 +11,15 @@ use HTTP::Request::Common qw/POST/;
 
 my $agent = WWW::Mechanize->new;
 
+#$agent->request(
+#    POST "http://sf.pm.org/cgi-bin/greymatter/gm.cgi", {
+
 $agent->request(
-    POST "http://sf.pm.org/cgi-bin/greymatter/gm.cgi", {
-        authorname => 'Test',
-        authorpassword => '',
-        newentrysubject => 'Test subject',
-        newentrymaintext => 'Test maintext',
+    POST "http://72.14.179.195/cgi-bin/greymatter/gm.cgi", {
+        authorname => 'alice8378',
+        authorpassword => 'test8378',
+        newentrysubject => 'Hello, World (' . int( rand $$ ) . ')',
+        newentrymaintext => 'Lorem ipsum (' . int( rand $$ ) . ')',
         newentrymoretext => '',
         newentryallowkarma => 'no',
         newentryallowcomments => 'no',
@@ -24,6 +27,8 @@ $agent->request(
         thomas => 'Add This Entry',
     },
 );
+
+$agent->get("http://72.14.179.195/cgi-bin/greymatter/gm.cgi?authorname=alice8378&authorpassword=test8378&thomas=rebuildupdate&rebuilding=everything&rebuildfrom=1&connectednumber=");
 
 ok(1);
 

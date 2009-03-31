@@ -15,8 +15,8 @@ $agent->get("https://www.linkedin.com/secure/login");
 
 $agent->submit_form(
     fields => {
-        session_key => 'robertkrimen+test@gmail.com',
-        session_password => 'pmannounce',
+        session_key => 'robertkrimen+alice8378@gmail.com',
+        session_password => 'test8378',
     },
     form_number => 2,
     button => 'session_login',
