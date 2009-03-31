@@ -3,6 +3,9 @@
 use strict;
 use warnings;
 
+use Test::Most;
+plan qw/no_plan/;
+
 use WWW::Mechanize;
 use HTTP::Request::Common qw/POST/;
 
@@ -21,5 +24,7 @@ $agent->request(
         thomas => 'Add This Entry',
     },
 );
+
+ok(1);
 
 # s*p*g***t
