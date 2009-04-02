@@ -15,6 +15,93 @@ Version 0.01
 
 our $VERSION = '0.01';
 
+use Moose;
+
+use File::HomeDir;
+use Path::Class;
+use Config::JFDI;
+use String::Util qw/trim/;
+
+use App::PM::Announce::Feed::meetup;
+use App::PM::Announce::Feed::linkedin;
+use App::PM::Announce::Feed::greymatter121c;
+
+has home_dir => qw/is ro lazy_build 1/;
+sub _build_home_dir {
+    my @home_dir;
+    @home_dir = grep { defined $_ } $ENV{APP_PM_ANNOUNCE_HOME}; # Don't want to write $ENV{...} twice
+    @home_dir = ( File::HomeDir->my_data, '.app-pm-announce' ) unless @home_dir;
+    return dir( @home_dir );
+}
+
+has config_file => qw/is ro lazy_build 1/;
+sub _build_config_file {
+    return shift->home_dir->file( 'config' );
+}
+
+has feed => qw/is ro isa HashRef lazy_build 1/;
+sub _build_feed {
+    my $self = shift;
+    return { 
+        meetup => $self->_build_meetup_feed,
+        linkedin => $self->_build_linkedin_feed,
+        greymatter121c => $self->_build_greymatter121c_feed,
+    };
+}
+
+sub _build_meetup_feed {
+    my $self = shift;
+    return App::PM::Announce::Feed::meetup->new;
+}
+
+sub _build_greymatter121c_feed {
+    my $self = shift;
+    return App::PM::Announce::Feed::greymatter121c->new;
+}
+
+sub _build_linkedin_feed {
+    my $self = shift;
+    return App::PM::Announce::Feed::linkedin->new;
+}
+
+sub startup {
+    my $self = shift;
+
+    my $home_dir = $self->home_dir;
+    $home_dir->mkpath unless -d $home_dir;
+
+    my $config_file = $self->config_file;
+    unless (-f $config_file) {
+        $config_file->openw->print( <<_END_ );
+# This is a config stub
+_END_
+    }
+}
+
+
+
+sub announce {
+    my $self = shift;
+    my %event = @_;
+
+    { # Validate, parse, and filter.
+
+        $event{$_} = trim $event{$_} for qw/title venue/;
+
+        die "Wasn't given a title for the event" unless $event{title};
+
+        die "Wasn't given a venue for the event" unless $event{venue};
+
+        die "Wasn't given a date & time for the event" unless $event{datetime};
+        die "The date & time isn't a DateTime object" unless $event{datetime}->isa( 'DateTime' );
+    }
+
+    my $result;
+
+    $result = $self->feed->{meetup}->announce( %event );
+    $result = $self->feed->{linkedin}->announce( %event );
+    $result = $self->feed->{greymatter121c}->announce( %event );
+}
 
 =head1 SYNOPSIS
 

@@ -6,6 +6,21 @@ use warnings;
 use Test::Most;
 plan qw/no_plan/;
 
+use App::PM::Announce::Feed::greymatter121c;
+my $feed = App::PM::Announce::Feed::greymatter121c->new(
+    username => 'alice8378',
+    password => 'test8378',
+    uri => 'http://72.14.179.195/cgi-bin/greymatter/gm.cgi',
+);
+my $key = int rand $$;
+$feed->announce(
+    title => "Event title ($key)",
+    description => "Event description ($key)",
+);
+
+ok(1);
+
+__END__
 use WWW::Mechanize;
 use HTTP::Request::Common qw/POST/;
 

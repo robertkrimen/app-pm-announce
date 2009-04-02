@@ -6,6 +6,25 @@ use warnings;
 use Test::Most;
 plan qw/no_plan/;
 
+use DateTime;
+use App::PM::Announce::Feed::meetup;
+my $feed = App::PM::Announce::Feed::meetup->new(
+    username => 'robert...krimen@gmail.com',
+    password => 'test8378',
+    uri => 'http://www.meetup.com/The-San-Francisco-Beta-Tester-Meetup-Group/calendar/?action=new',
+);
+my $key = int rand $$;
+$feed->announce(
+    title => "Event title ($key)",
+    description => "Event description ($key)",
+    venue => 920502,
+    datetime => DateTime->now->add(days => 10),
+);
+
+ok(1);
+
+__END__
+
 use WWW::Mechanize;
 use HTTP::Request::Common qw/POST/;
 use HTML::TreeBuilder;

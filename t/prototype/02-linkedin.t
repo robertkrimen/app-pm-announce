@@ -6,6 +6,22 @@ use warnings;
 use Test::Most;
 plan qw/no_plan/;
 
+use App::PM::Announce::Feed::linkedin;
+my $feed = App::PM::Announce::Feed::linkedin->new(
+    username => 'robertkrimen+alice8378@gmail.com',
+    password => 'test8378',
+    gid => 1873425,
+);
+my $key = int rand $$;
+$feed->announce(
+    title => "Event title ($key)",
+    description => "Event description ($key)",
+);
+
+ok(1);
+
+__END__
+
 use WWW::Mechanize;
 use HTTP::Request::Common qw/POST/;
 

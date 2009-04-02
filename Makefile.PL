@@ -29,6 +29,10 @@ _END_
 Config::JFDI
 Moose
 WWW::Mechanize
+Getopt::Chain
+File::HomeDir
+Config::General
+String::Util
 _END_
 }
 
