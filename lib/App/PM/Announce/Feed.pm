@@ -9,6 +9,7 @@ use WWW::Mechanize;
 use HTTP::Request::Common qw/GET POST/;
 use HTML::TreeBuilder;
 
+has app => qw/is ro isa App::PM::Announce required 1/, handles => [qw/ logger /];
 has username => qw/is ro isa Str required 1/;
 has password => qw/is ro isa Str required 1/;
 
@@ -19,11 +20,15 @@ sub _build_agent {
 
 sub get {
     my $self = shift;
+    $self->logger->debug( "get $_[0]" );
     $self->agent->request( GET @_ );
+#    $self->agent->get( @_ );
 }
 
 sub post {
     my $self = shift;
+    $self->logger->debug( "post $_[0]" );
+#    $self->agent->post( @_ );
     $self->agent->request( POST @_ );
 }
 

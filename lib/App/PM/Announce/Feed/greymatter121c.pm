@@ -16,6 +16,8 @@ sub announce {
     my $password = $self->password;
     my $uri = $self->uri;
 
+    $self->logger->debug( "login as $username/$password" );
+
     $self->post(
         $uri => {
             authorname => $username,
@@ -30,7 +32,9 @@ sub announce {
         },
     );
 
-    die "Wasn't able to add a new greymatter entry" unless $self->content =~ m/Your new entry has been added/
+    die "Wasn't able to add a new greymatter entry" unless $self->content =~ m/Your new entry has been added/;
+
+    $self->logger->debug( "submitted to greymatter121c at $uri" );
 
 #    This isn't necessary since greymatter does this automatically
 #    my $rebuild_uri = URI->new( $uri );

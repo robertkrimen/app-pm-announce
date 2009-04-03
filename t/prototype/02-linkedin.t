@@ -6,11 +6,13 @@ use warnings;
 use Test::Most;
 plan qw/no_plan/;
 
-use App::PM::Announce::Feed::linkedin;
+use App::PM::Announce;
+my $app = App::PM::Announce->new;
 my $feed = App::PM::Announce::Feed::linkedin->new(
+    app => $app,
     username => 'robertkrimen+alice8378@gmail.com',
     password => 'test8378',
-    gid => 1873425,
+    uri => 'http://www.linkedin.com/groupAnswers?start=&gid=1873425',
 );
 my $key = int rand $$;
 $feed->announce(

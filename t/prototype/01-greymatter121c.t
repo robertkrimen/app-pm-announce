@@ -6,8 +6,10 @@ use warnings;
 use Test::Most;
 plan qw/no_plan/;
 
-use App::PM::Announce::Feed::greymatter121c;
+use App::PM::Announce;
+my $app = App::PM::Announce->new;
 my $feed = App::PM::Announce::Feed::greymatter121c->new(
+    app => $app,
     username => 'alice8378',
     password => 'test8378',
     uri => 'http://72.14.179.195/cgi-bin/greymatter/gm.cgi',

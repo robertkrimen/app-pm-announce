@@ -7,6 +7,7 @@ use Moose;
 extends 'App::PM::Announce::Feed';
 
 has uri => qw/is ro required 1/;
+has venue => qw/is ro/;
 
 sub announce {
     my $self = shift;
@@ -15,10 +16,12 @@ sub announce {
     my $username = $self->username;
     my $password = $self->password;
     my $uri = $self->uri;
-    my $venue = 920502;
+    my $venue = $event{venue} || $self->venue;
     my $datetime = $event{datetime};
 
     $self->get("http://www.meetup.com/login/");
+
+    $self->logger->debug( "login as $username/$password" );
 
     $self->submit_form(
         fields => {
@@ -60,10 +63,12 @@ sub announce {
 
     my $href = $a->attr( 'href' );
 
-    {
-        my $uri = URI->new( $href );
-        $uri->query( undef );
-    }
+    my $meetup_uri = URI->new( $href );
+    $meetup_uri->query( undef );
+
+    $self->logger->debug( "submitted to meetup at $uri" );
+
+    return { meetup_uri => $meetup_uri };
 }
 
 1;

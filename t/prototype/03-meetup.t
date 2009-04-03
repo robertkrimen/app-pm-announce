@@ -7,8 +7,10 @@ use Test::Most;
 plan qw/no_plan/;
 
 use DateTime;
-use App::PM::Announce::Feed::meetup;
+use App::PM::Announce;
+my $app = App::PM::Announce->new;
 my $feed = App::PM::Announce::Feed::meetup->new(
+    app => $app,
     username => 'robert...krimen@gmail.com',
     password => 'test8378',
     uri => 'http://www.meetup.com/The-San-Francisco-Beta-Tester-Meetup-Group/calendar/?action=new',

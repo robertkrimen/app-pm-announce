@@ -6,7 +6,7 @@ use strict;
 use Moose;
 extends 'App::PM::Announce::Feed';
 
-has gid => qw/is ro required 1/;
+has uri => qw/is ro required 1/;
 
 sub announce {
     my $self = shift;
@@ -14,9 +14,12 @@ sub announce {
 
     my $username = $self->username;
     my $password = $self->password;
-    my $gid = $self->gid;
+    my $uri = $self->uri;
+    $uri = "http://www.linkedin.com/groupAnswers?start=&gid=$uri" if $uri =~ m/^\d+$/;
 
-    $self->get("https://www.linkedin.com/secure/login");
+    $self->get( "https://www.linkedin.com/secure/login" );
+
+    $self->logger->debug( "login as $username/$password" );
 
     $self->submit_form(
         fields => {
@@ -29,7 +32,9 @@ sub announce {
 
     die "Wasn't logged in" unless $self->content =~ m/If you are not automatically redirected/;
 
-    $self->get("http://www.linkedin.com/groupAnswers?start=&gid=$gid");
+    $self->get( $uri );
+
+    die "Not able to start a discussion via $uri" unless $self->content =~ m/Start a Discussion/;
 
     $self->submit_form(
         fields => {
@@ -41,6 +46,8 @@ sub announce {
     );
 
     die "Not sure if discussion was posted" unless $self->content =~ m/Your discussion has been posted successfully/;
+
+    $self->logger->debug( "submitted to linkedin at $uri" );
 }
 
 1;

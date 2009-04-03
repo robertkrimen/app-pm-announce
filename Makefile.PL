@@ -33,6 +33,8 @@ Getopt::Chain
 File::HomeDir
 Config::General
 String::Util
+HTML::TreeBuilder
+MooseX::LogDispatch
 _END_
 }
 

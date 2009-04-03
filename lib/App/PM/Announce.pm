@@ -16,20 +16,27 @@ Version 0.01
 our $VERSION = '0.01';
 
 use Moose;
+with 'MooseX::LogDispatch';
 
 use File::HomeDir;
 use Path::Class;
 use Config::JFDI;
+use Config::General;
 use String::Util qw/trim/;
 
 use App::PM::Announce::Feed::meetup;
 use App::PM::Announce::Feed::linkedin;
 use App::PM::Announce::Feed::greymatter121c;
 
+sub BUILD {
+    my $self = shift;
+    $self->startup;
+}
+
 has home_dir => qw/is ro lazy_build 1/;
 sub _build_home_dir {
     my @home_dir;
-    @home_dir = grep { defined $_ } $ENV{APP_PM_ANNOUNCE_HOME}; # Don't want to write $ENV{...} twice
+    @home_dir = grep { exists $ENV{$_} && defined $ENV{$_} } qw/APP_PM_ANNOUNCE_HOME/; # Don't want to write $ENV{...} twice
     @home_dir = ( File::HomeDir->my_data, '.app-pm-announce' ) unless @home_dir;
     return dir( @home_dir );
 }
@@ -37,6 +44,30 @@ sub _build_home_dir {
 has config_file => qw/is ro lazy_build 1/;
 sub _build_config_file {
     return shift->home_dir->file( 'config' );
+}
+
+has config_default => qw/is ro isa HashRef lazy_build 1/;
+sub _build_config_default {
+    return {};
+}
+
+#has _config => qw/is ro isa Config::JFDI lazy_build 1/;
+#sub _build__config {
+#    my $self = shift;
+#    return Config::JFDI->new(file => $self->config_file);
+#}
+
+#sub config {
+#    return shift->_config->get;
+#}
+
+has config => qw/is ro isa HashRef lazy_build 1/;
+sub _build_config {
+    my $self = shift;
+    return { Config::General->new(
+        -ConfigFile => $self->config_file,
+        -DefaultConfig => $self->config_default,
+    )->getall };
 }
 
 has feed => qw/is ro isa HashRef lazy_build 1/;
@@ -51,27 +82,54 @@ sub _build_feed {
 
 sub _build_meetup_feed {
     my $self = shift;
-    return App::PM::Announce::Feed::meetup->new;
+    return undef unless my $given = $self->config->{feed}->{meetup};
+    return App::PM::Announce::Feed::meetup->new(
+        app => $self,
+        username => $given->{username},
+        password => $given->{password},
+        uri => $given->{uri},
+        venue => $given->{venue},
+    );
 }
 
 sub _build_greymatter121c_feed {
     my $self = shift;
-    return App::PM::Announce::Feed::greymatter121c->new;
+    return undef unless my $given = $self->config->{feed}->{greymatter121c};
+    return App::PM::Announce::Feed::greymatter121c->new(
+        app => $self,
+        username => $given->{username},
+        password => $given->{password},
+        uri => $given->{uri},
+    );
 }
 
 sub _build_linkedin_feed {
     my $self = shift;
-    return App::PM::Announce::Feed::linkedin->new;
+    return undef unless my $given = $self->config->{feed}->{linkedin};
+    return App::PM::Announce::Feed::linkedin->new(
+        app => $self,
+        username => $given->{username},
+        password => $given->{password},
+        uri => $given->{uri},
+    );
 }
 
 sub startup {
     my $self = shift;
 
     my $home_dir = $self->home_dir;
-    $home_dir->mkpath unless -d $home_dir;
+    $self->logger->debug( "home_dir is $home_dir" );
+
+    unless (-d $home_dir) {
+        $self->logger->debug( "making $home_dir because it does not exist" );
+        $home_dir->mkpath;
+    }
 
     my $config_file = $self->config_file;
+    $self->logger->debug( "config_file is $config_file" );
+
     unless (-f $config_file) {
+        $self->logger->debug( "making $config_file stub because it does not exist" );
         $config_file->openw->print( <<_END_ );
 # This is a config stub
 _END_
@@ -99,7 +157,11 @@ sub announce {
     my $result;
 
     $result = $self->feed->{meetup}->announce( %event );
+
+    $event{description} = [ $event{description}, $result->{meetup_uri} ];
+
     $result = $self->feed->{linkedin}->announce( %event );
+
     $result = $self->feed->{greymatter121c}->announce( %event );
 }
 
