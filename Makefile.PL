@@ -26,15 +26,18 @@ Test::Most
 _END_
 
     map { my ($pk, $vr) = split m/\s/; requires $pk => $vr || 0 } grep { ! /^\s*#/ } split m/\n/, <<_END_;
-Config::JFDI
-Moose
-WWW::Mechanize
-Getopt::Chain
-File::HomeDir
 Config::General
-String::Util
+Config::JFDI
+DateTime
+File::HomeDir
+Getopt::Chain
 HTML::TreeBuilder
+HTTP::Request::Common
+Moose
 MooseX::LogDispatch
+Path::Class
+String::Util
+WWW::Mechanize
 _END_
 }
 

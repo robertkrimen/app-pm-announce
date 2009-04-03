@@ -9,11 +9,11 @@ App::PM::Announce -
 
 =head1 VERSION
 
-Version 0.01
+Version 0.01_1
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.01_1';
 
 use Moose;
 with 'MooseX::LogDispatch';
@@ -36,7 +36,7 @@ sub BUILD {
 has home_dir => qw/is ro lazy_build 1/;
 sub _build_home_dir {
     my @home_dir;
-    @home_dir = grep { exists $ENV{$_} && defined $ENV{$_} } qw/APP_PM_ANNOUNCE_HOME/; # Don't want to write $ENV{...} twice
+    @home_dir = map { exists $ENV{$_} && defined $ENV{$_} ? $ENV{$_} : () } qw/APP_PM_ANNOUNCE_HOME/; # Don't want to write $ENV{...} twice
     @home_dir = ( File::HomeDir->my_data, '.app-pm-announce' ) unless @home_dir;
     return dir( @home_dir );
 }
@@ -167,10 +167,14 @@ sub announce {
 
 =head1 SYNOPSIS
 
+    # From the command-line
+    ./pm-announce test
+
+=head1 DESCRIPTION
+
+App::PM::Announce is a tool for creating and advertising PM meetings. More soon
+
 =cut
-
-
-# http://www.linkedin.com/groupAnswers?start=&gid=1873425
 
 =head1 AUTHOR
 
