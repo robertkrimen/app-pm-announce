@@ -2,9 +2,16 @@ NAME
     App::PM::Announce -
 
 VERSION
-    Version 0.01
+    Version 0.01_1
 
 SYNOPSIS
+        # From the command-line
+        ./pm-announce test
+
+DESCRIPTION
+    App::PM::Announce is a tool for creating and advertising PM meetings.
+    More soon
+
 AUTHOR
     Robert Krimen, "<rkrimen at cpan.org>"
 
