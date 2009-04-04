@@ -6,7 +6,6 @@ use strict;
 use Moose;
 extends 'App::PM::Announce::Feed';
 
-has uri => qw/is ro required 1/;
 has venue => qw/is ro/;
 
 sub announce {

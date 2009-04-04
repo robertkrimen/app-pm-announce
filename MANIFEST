@@ -24,11 +24,14 @@ lib/App/PM/Announce/Feed/.meetup.pm.swp
 lib/App/PM/Announce/Feed/greymatter121c.pm
 lib/App/PM/Announce/Feed/linkedin.pm
 lib/App/PM/Announce/Feed/meetup.pm
+lib/App/PM/Announce/History.pm
 META.yml
 script/pm-announce
-t/00-load.t
-t/01-basic.t
-t/02-config.t
+t/000-load.t
+t/001-basic.t
+t/002-config.t
+t/003-parse.t
+t/004-history.t
 t/assets/home/config
 t/prototype/.02-linkedin.t.swp
 t/prototype/01-greymatter121c.t

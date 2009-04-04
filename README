@@ -6,7 +6,7 @@ VERSION
 
 SYNOPSIS
         # From the command-line
-        ./pm-announce test
+        pm-announce test
 
 DESCRIPTION
     App::PM::Announce is a tool for creating and advertising PM meetings.

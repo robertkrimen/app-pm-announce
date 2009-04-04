@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use XML::Feed;
+use URI;
+use XXX;
+use WWW::Mechanize;
+
+my $agent = WWW::Mechanize->new;
+my $uri = "http://www.meetup.com/The-San-Francisco-Beta-Tester-Meetup-Group/calendar/rss/The+San+Francisco+Beta+Tester+Meetup+Group/";
+my $feed = XML::Feed->parse(URI->new($uri)) or warn XML::Feed->errstr;
+
+$agent->get("http://www.meetup.com/login/");
+
+my ($username, $password) = ('robert...krimen@gmail.com', 'test8378');
+
+$agent->submit_form(
+    fields => {
+        email => $username,
+        password => $password,
+    },
+    form_number => 1,
+    button => 'submitButton',
+);
+
+die "Wasn't logged in" unless $agent->content =~ m/Your Meetup Groups/;
+
+for my $item ($feed->items) {
+    my $uri = $item->{entry}->{permaLink};
+    $agent->get("$uri/cancel");
+    $agent->submit_form(
+        fields => {
+            cancel_action_type => 'delete',
+        },
+        form_number => 1,
+        button => 'submitButton',
+    );
+}
+
+1;
+

@@ -28,7 +28,11 @@ _END_
     map { my ($pk, $vr) = split m/\s/; requires $pk => $vr || 0 } grep { ! /^\s*#/ } split m/\n/, <<_END_;
 Config::General
 Config::JFDI
+DBD::SQLite
+DBI
+DBIx::Simple
 DateTime
+Document::Stembolt
 File::HomeDir
 Getopt::Chain
 HTML::TreeBuilder

@@ -6,6 +6,7 @@ use strict;
 use Getopt::Chain;
 use App::PM::Announce;
 use DateTime;
+use Text::Table;
 
 my $app;
 sub app {
@@ -63,6 +64,42 @@ _END_
                     venue => 920502,
                     datetime => DateTime->now->add(days => 10),
                 );
+            },
+            template => sub {
+                my ($context, @arguments) = @_;
+                print STDOUT app->template;
+            },
+            announce => sub {
+                my ($context, @arguments) = @_;
+                app->announce( \*STDIN );
+            },
+            history => sub {
+                my ($context, @arguments) = @_;
+                my $query = shift @arguments;
+                if ($query) {
+                    my $event = app->history->find( $query );
+                    my $data = $event->{data};
+                    {
+                        no warnings 'uninitialized';
+                        print <<_END_;
+
+$event->{uuid}
+$data->{title}
+$data->{meetup_uri}
+
+_END_
+                    }
+                }
+                else {
+                    my @all = app->history->all;
+                    my @table = map {
+                        my $data = $_->{data};
+                        my $did;
+                        $did += $data->{"did_$_"} ? 1 : 0 for qw/meetup linkedin greymatter121c/;
+                        [ join ' | ', $_->{uuid}, $data->{title}, $_->{insert_datetime}, "$did/3" ];
+                    } app->history->all;
+                    print "\n", Text::Table->new->load( @table ), "\n";
+                }
             },
         },
     );

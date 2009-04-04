@@ -23,7 +23,11 @@ use Path::Class;
 use Config::JFDI;
 use Config::General;
 use String::Util qw/trim/;
+use Data::UUID;
+use Document::Stembolt;
+use DateTimeX::Easy;
 
+use App::PM::Announce::History;
 use App::PM::Announce::Feed::meetup;
 use App::PM::Announce::Feed::linkedin;
 use App::PM::Announce::Feed::greymatter121c;
@@ -114,6 +118,12 @@ sub _build_linkedin_feed {
     );
 }
 
+has history => qw/is ro isa App::PM::Announce::History lazy_build 1/;
+sub _build_history {
+    my $self = shift;
+    return App::PM::Announce::History->new( app => $self );
+}
+
 sub startup {
     my $self = shift;
 
@@ -140,35 +150,104 @@ _END_
 
 sub announce {
     my $self = shift;
-    my %event = @_;
+    my %event;
+    if (ref $_[0]) {
+        my $document = $self->parse( @_ );
+        %event = %{ $document->header };
+        $event{description} = $document->body;
+    }
+    else {
+        %event = @_;
+    }
 
     { # Validate, parse, and filter.
 
         $event{$_} = trim $event{$_} for qw/title venue/;
 
-        die "Wasn't given a title for the event" unless $event{title};
+        die "Wasn't given a UUID for the event\n" unless $event{uuid};
 
-        die "Wasn't given a venue for the event" unless $event{venue};
+        die "Wasn't given a title for the event\n" unless $event{title};
 
-        die "Wasn't given a date & time for the event" unless $event{datetime};
-        die "The date & time isn't a DateTime object" unless $event{datetime}->isa( 'DateTime' );
+        die "Wasn't given a venue for the event\n" unless $event{venue};
+
+        die "Wasn't given a date & time for the event\n" unless $event{datetime};
+        die "The date & time isn't a DateTime object\n" unless $event{datetime}->isa( 'DateTime' );
     }
 
-    my $result;
+    my ($event, $result);
+    my $uuid = $event{uuid};
+    $event = $self->history->find_or_insert( $uuid )->{data};
+    $self->history->update( $uuid => %event );
 
-    $result = $self->feed->{meetup}->announce( %event );
+    if ($event->{did_meetup}) {
+        $self->logger->debug( "Already posted to meetup, skipping" );
+        $self->logger->debug( "meetup_uri is " . $event->{meetup_uri} );
+    }
+    else {
+        $result = $self->feed->{meetup}->announce( %event );
+        my $meetup_uri = $event->{meetup_uri} = $result->{meetup_uri};
+        $self->logger->debug( "meetup_uri is " . $meetup_uri );
+        $self->history->update( $uuid => did_meetup => 1, meetup_uri => "$meetup_uri" );
+    }
 
-    $event{description} = [ $event{description}, $result->{meetup_uri} ];
+    $event{description} = [ $event{description}, $event->{meetup_uri} ];
 
-    $result = $self->feed->{linkedin}->announce( %event );
+    if ($event->{did_linkedin}) {
+        $self->logger->debug( "Already posted to linkedin, skipping" );
+    }
+    else {
+        $result = $self->feed->{linkedin}->announce( %event );
+        $self->history->update( $uuid => did_linkedin => 1 );
+    }
 
-    $result = $self->feed->{greymatter121c}->announce( %event );
+    if ($event->{did_greymatter121c}) {
+        $self->logger->debug( "Already posted to sfpm, skipping" );
+    }
+    else {
+        $result = $self->feed->{greymatter121c}->announce( %event );
+        $self->history->update( $uuid => did_greymatter121c => 1 );
+    }
+}
+
+sub parse {
+    my $self = shift;
+
+    die "Couldn't parse" unless my $document = Document::Stembolt::Content->read(shift);
+
+    my $datetime = $document->header->{datetime};
+    die "You didn't give a datetime" unless $datetime;
+    die "Unable to parse ", $document->header->{datetime} unless $datetime = DateTimeX::Easy->parse( $datetime );
+    $document->header->{datetime} = $datetime;
+
+    return $document;
+}
+
+sub template {
+    my $self = shift;
+
+    my $uuid = Data::UUID->new->create_str;
+    my $datetime = DateTimeX::Easy->parse( '4th tuesday' );
+    my $venue = $self->config->{venue} || '';
+    $datetime = DateTimeX::Easy->parse( '3rd tuesday' ) unless $datetime;
+    $datetime->set(hour => 19, minute => 0, second => 0);
+
+    return <<_END_;
+# App-PM-Announce
+---
+title: The title of the event
+venue: $venue
+datetime: $datetime
+uuid: $uuid
+---
+Put your multi-line description for the event here.
+Everything below the '---' is considered the description.
+_END_
 }
 
 =head1 SYNOPSIS
 
     # From the command-line
-    ./pm-announce test
+    pm-announce test
 
 =head1 DESCRIPTION
 

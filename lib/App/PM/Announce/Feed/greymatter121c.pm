@@ -6,8 +6,6 @@ use strict;
 use Moose;
 extends 'App::PM::Announce::Feed';
 
-has uri => qw/is ro required 1/;
-
 sub announce {
     my $self = shift;
     my %event = @_;

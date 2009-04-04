@@ -12,6 +12,7 @@ use HTML::TreeBuilder;
 has app => qw/is ro isa App::PM::Announce required 1/, handles => [qw/ logger /];
 has username => qw/is ro isa Str required 1/;
 has password => qw/is ro isa Str required 1/;
+has uri => qw/is ro required 1/;
 
 has agent => qw/is ro lazy_build 1/, handles => [qw/ submit_form /];
 sub _build_agent {
