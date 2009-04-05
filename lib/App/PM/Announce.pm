@@ -184,8 +184,9 @@ sub announce {
         $self->logger->debug( "meetup_uri is " . $event->{meetup_uri} );
     }
     else {
-        $result = $self->feed->{meetup}->announce( %event );
+        die "Didn't announce on meetup" unless $result = $self->feed->{meetup}->announce( %event );
         my $meetup_uri = $event->{meetup_uri} = $result->{meetup_uri};
+        die "Didn't get back a meetup uri" unless $meetup_uri;
         $self->logger->debug( "meetup_uri is " . $meetup_uri );
         $self->history->update( $uuid => did_meetup => 1, meetup_uri => "$meetup_uri" );
     }
@@ -196,7 +197,7 @@ sub announce {
         $self->logger->debug( "Already posted to linkedin, skipping" );
     }
     else {
-        $result = $self->feed->{linkedin}->announce( %event );
+        die "Didn't announce on greymatter" unless $result = $self->feed->{linkedin}->announce( %event );
         $self->history->update( $uuid => did_linkedin => 1 );
     }
 
@@ -204,7 +205,7 @@ sub announce {
         $self->logger->debug( "Already posted to greymatter, skipping" );
     }
     else {
-        $result = $self->feed->{greymatter}->announce( %event );
+        die "Didn't announce on greymatter" unless $result = $self->feed->{greymatter}->announce( %event );
         $self->history->update( $uuid => did_greymatter => 1 );
     }
 }
