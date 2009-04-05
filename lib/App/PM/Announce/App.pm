@@ -5,6 +5,7 @@ use strict;
 
 use Getopt::Chain;
 use App::PM::Announce;
+use App::PM::Announce::Util;
 use DateTime;
 use Text::Table;
 
@@ -96,7 +97,7 @@ _END_
                         my $data = $_->{data};
                         my $did;
                         $did += $data->{"did_$_"} ? 1 : 0 for qw/meetup linkedin greymatter/;
-                        [ join ' | ', $_->{uuid}, $data->{title}, $_->{insert_datetime}, "$did/3" ];
+                        [ join ' | ', $_->{uuid}, $data->{title}, App::PM::Announce::Util->age( $_->{insert_datetime} ) . ' ago', "$did/3" ];
                     } app->history->all;
                     print "\n", Text::Table->new->load( @table ), "\n";
                 }

@@ -1,14 +1,14 @@
 TODO:
     - Implement dry-run
     - Image fetching/uploading
-    - Datetime as "* ago"
     - Config checker
     - Improve logging
     - Add reporting
 
 Sunday April 05 14:56:51 PDT 2009:
-    - Change greymatter121c => greymatter
+    - Datetime as "* ago"
     - Abort unless have meetup_uri
+    - Change greymatter121c => greymatter
 
 2009-04-02:
     - Initial release
