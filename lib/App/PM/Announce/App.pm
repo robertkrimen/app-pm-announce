@@ -47,7 +47,7 @@ _END_
                             password test8378
                             uri http://www.linkedin.com/groupAnswers?start=&gid=1873425
                         }},
-                        greymatter121c => {qw{
+                        greymatter => {qw{
                             username alice8378
                             password test8378
                             uri http://72.14.179.195/cgi-bin/greymatter/gm.cgi
@@ -95,7 +95,7 @@ _END_
                     my @table = map {
                         my $data = $_->{data};
                         my $did;
-                        $did += $data->{"did_$_"} ? 1 : 0 for qw/meetup linkedin greymatter121c/;
+                        $did += $data->{"did_$_"} ? 1 : 0 for qw/meetup linkedin greymatter/;
                         [ join ' | ', $_->{uuid}, $data->{title}, $_->{insert_datetime}, "$did/3" ];
                     } app->history->all;
                     print "\n", Text::Table->new->load( @table ), "\n";

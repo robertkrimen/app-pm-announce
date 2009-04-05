@@ -8,7 +8,7 @@ plan qw/no_plan/;
 
 use App::PM::Announce;
 my $app = App::PM::Announce->new;
-my $feed = App::PM::Announce::Feed::greymatter121c->new(
+my $feed = App::PM::Announce::Feed::greymatter->new(
     app => $app,
     username => 'alice8378',
     password => 'test8378',

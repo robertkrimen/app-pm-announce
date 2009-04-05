@@ -1,4 +1,4 @@
-package App::PM::Announce::Feed::greymatter121c;
+package App::PM::Announce::Feed::greymatter;
 
 use warnings;
 use strict;
@@ -32,7 +32,7 @@ sub announce {
 
     die "Wasn't able to add a new greymatter entry" unless $self->content =~ m/Your new entry has been added/;
 
-    $self->logger->debug( "submitted to greymatter121c at $uri" );
+    $self->logger->debug( "submitted to greymatter at $uri" );
 
 #    This isn't necessary since greymatter does this automatically
 #    my $rebuild_uri = URI->new( $uri );

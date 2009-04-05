@@ -30,7 +30,7 @@ use DateTimeX::Easy;
 use App::PM::Announce::History;
 use App::PM::Announce::Feed::meetup;
 use App::PM::Announce::Feed::linkedin;
-use App::PM::Announce::Feed::greymatter121c;
+use App::PM::Announce::Feed::greymatter;
 
 sub BUILD {
     my $self = shift;
@@ -80,7 +80,7 @@ sub _build_feed {
     return { 
         meetup => $self->_build_meetup_feed,
         linkedin => $self->_build_linkedin_feed,
-        greymatter121c => $self->_build_greymatter121c_feed,
+        greymatter => $self->_build_greymatter_feed,
     };
 }
 
@@ -96,10 +96,10 @@ sub _build_meetup_feed {
     );
 }
 
-sub _build_greymatter121c_feed {
+sub _build_greymatter_feed {
     my $self = shift;
-    return undef unless my $given = $self->config->{feed}->{greymatter121c};
-    return App::PM::Announce::Feed::greymatter121c->new(
+    return undef unless my $given = $self->config->{feed}->{greymatter};
+    return App::PM::Announce::Feed::greymatter->new(
         app => $self,
         username => $given->{username},
         password => $given->{password},
@@ -200,12 +200,12 @@ sub announce {
         $self->history->update( $uuid => did_linkedin => 1 );
     }
 
-    if ($event->{did_greymatter121c}) {
-        $self->logger->debug( "Already posted to sfpm, skipping" );
+    if ($event->{did_greymatter}) {
+        $self->logger->debug( "Already posted to greymatter, skipping" );
     }
     else {
-        $result = $self->feed->{greymatter121c}->announce( %event );
-        $self->history->update( $uuid => did_greymatter121c => 1 );
+        $result = $self->feed->{greymatter}->announce( %event );
+        $self->history->update( $uuid => did_greymatter => 1 );
     }
 }
 
