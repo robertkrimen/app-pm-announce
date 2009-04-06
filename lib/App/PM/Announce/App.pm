@@ -16,30 +16,62 @@ sub app {
     return $app ||= App::PM::Announce->new(@app);
 }
 
+sub help {
+    print <<_END_
+
+Usage:
+
+    $0 [OPTIONS] <COMMAND>
+
+OPTIONS
+
+    verbose|v   Debugging mode. Be verbose when reporting
+    help|h|?    This help screen
+    dry-run|n   Don't actually login and announce, just show what would be done
+
+COMMANDS
+
+    config              Check the config file (@{[ app->config_file ]})
+
+    history             Show announcement history
+
+    history <query>     Show announcement history for event <query>, where <query> should be enough of the uuid to be unambiguous
+
+    template            Print out a template to be used for input to the 'announce' command
+
+    announce            Read STDIN for the event information and make a post for each feed
+
+    test                Post a bogus event to a test meetup account, test linkedin account, and test greymatter account
+
+    help                This help screen
+
+SYNOPSIS
+
+    # Using the commandline...
+    pm-announce template > event.txt
+
+    # Edit event.txt with your editor of choice...
+    pm-announce announce < event.txt
+
+_END_
+}
+
 sub run {
     Getopt::Chain->process(
-        options => [qw/ verbose|v dry-run|n /],
+        options => [qw/ verbose|v dry-run|n help|h|? /],
         run => sub {
             my ($context, @arguments) = @_;
             push @app, qw/debug 1 verbose 1/ if $context->option( 'verbose' );
             push @app, qw/dry_run 1/ if $context->option( 'dry-run' );
-            return if @arguments;
+            return if @arguments && ! $context->option( 'help' );
             app;
-            print <<_END_;
-
-The only thing you can do right now:
-
-    $0 test
-
-Which will submit an announcement to:
-
-    robert...krimen\@gmail.com / test8378 \@ http://www.meetup.com/The-San-Francisco-Beta-Tester-Meetup-Group/calendar/?action=new
-    robertkrimen+alice8378\@gmail.com / test8378 \@ http://www.linkedin.com/groupAnswers?start=&gid=1873425
-    alice8378 / test8378 \@ http://72.14.179.195/cgi-bin/greymatter/gm.cgi
-
-_END_
+            help;
+            exit;
         },
         commands => {
+            help => sub {
+                help;
+            },
             config => sub {
                 my ($context, @arguments) = @_;
                 my $config = app->config;
@@ -149,3 +181,18 @@ _END_
 }
 
 1;
+
+__END__
+            print <<_END_;
+
+The only thing you can do right now:
+
+    $0 test
+
+Which will submit an announcement to:
+
+    robert...krimen\@gmail.com / test8378 \@ http://www.meetup.com/The-San-Francisco-Beta-Tester-Meetup-Group/calendar/?action=new
+    robertkrimen+alice8378\@gmail.com / test8378 \@ http://www.linkedin.com/groupAnswers?start=&gid=1873425
+    alice8378 / test8378 \@ http://72.14.179.195/cgi-bin/greymatter/gm.cgi
+
+_END_

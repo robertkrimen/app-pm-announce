@@ -1,8 +1,8 @@
 TODO:
     - Image fetching/uploading
-    - Add 'help' screen and documentation
 
 Sunday April 05 14:56:51 PDT 2009:
+    - Add 'help' screen and documentation
     - Generate better config stub
     - Config checker
     - Improve history display 
