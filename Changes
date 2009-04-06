@@ -2,9 +2,9 @@ TODO:
     - Image fetching/uploading
     - Config checker
     - Generate better config stub
-    - Improve history display 
 
 Sunday April 05 14:56:51 PDT 2009:
+    - Improve history display 
     - Implement dry-run
     - Improve logging
     - Add reporting

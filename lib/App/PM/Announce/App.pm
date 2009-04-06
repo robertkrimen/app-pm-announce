@@ -94,24 +94,40 @@ _END_
                     my $data = $event->{data};
                     {
                         no warnings 'uninitialized';
+                        print "\n";
                         print <<_END_;
-
+"$data->{title}"
 $event->{uuid}
-$data->{title}
 $data->{meetup_link}
-
 _END_
+                        print "Made ", App::PM::Announce::Util->age( $event->{insert_datetime} ) . ' ago', " (", $event->{insert_datetime}, ")\n";
+                        print "Announced on ", join( ', ', map { $data->{"did_$_"} ? $_ : () } qw/meetup linkedin greymatter/ ), "\n";
+                        print "\n";
+
                     }
                 }
                 else {
+                    my $verbose = $context->option( 'verbose' );
                     my @all = app->history->all;
                     my @table = map {
                         my $data = $_->{data};
                         my $did;
                         $did += $data->{"did_$_"} ? 1 : 0 for qw/meetup linkedin greymatter/;
-                        [ join ' | ', $_->{uuid}, $data->{title}, App::PM::Announce::Util->age( $_->{insert_datetime} ) . ' ago', "$did/3" ];
+                        [
+                            $verbose ? $_->{uuid} : substr($_->{uuid}, 0, 8),
+                            $data->{title},
+                            $verbose ? $_->{insert_datetime} : App::PM::Announce::Util->age( $_->{insert_datetime} ) . ' ago',
+                            "$did/3"
+                        ];
                     } app->history->all;
-                    print "\n", Text::Table->new->load( @table ), "\n";
+                    my $table = Text::Table->new( 'uuid', \' | ', 'title', \' | ', 'age', \' | ', 'did' )->load( @table );
+                    print
+                        "\n",
+                        $table->rule( '-', '+' ),
+                        $table->body,
+                        $table->rule( '-', '+' ),
+                        "\n",
+                    ;
                 }
             },
         },
