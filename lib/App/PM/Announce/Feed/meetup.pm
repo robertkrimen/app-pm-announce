@@ -35,6 +35,9 @@ sub announce {
 
     $self->get($uri);
 
+    my $hour12 = $datetime->hour;
+    $hour12 -= 12 if $hour12 > 12;
+    $hour12 = 12 unless $hour12;
     $self->submit_form(
         fields => {
             title => $self->format( \%event => 'title' ),
@@ -44,7 +47,7 @@ sub announce {
             'event.day' => $datetime->day,
             'event.month' => $datetime->month,
             'event.year' => $datetime->year,
-            'event.hour12' => $datetime->strftime('%h'),
+            'event.hour12' => $hour12,
             'event.minute' => $datetime->minute,
             'event.ampm' => $datetime->hour >= 12 ? 'PM' : 'AM',
         },

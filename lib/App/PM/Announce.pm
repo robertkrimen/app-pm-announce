@@ -246,7 +246,7 @@ sub announce {
 
         die "Wasn't given a title for the event\n" unless $event{title};
 
-        die "Wasn't given a venue for the event\n" unless $event{venue};
+#        die "Wasn't given a venue for the event\n" unless $event{venue};
 
         die "Wasn't given a date & time for the event\n" unless $event{datetime};
         die "The date & time isn't a DateTime object\n" unless $event{datetime}->isa( 'DateTime' );
@@ -282,7 +282,10 @@ sub announce {
 
         die "Don't have a Meetup link" unless $self->dry_run || $event->{meetup_link};
 
-        $event{description} = [ $event{description}, $event->{meetup_link} ];
+#        $event{description} = [
+#            $event{description},
+#            "\nRSVP at Meetup - <a href=\"$event->{meetup_link}\">$event->{meetup_link}</a>"
+#        ];
 
         if ($event->{did_linkedin}) {
             $self->logger->debug( "Already posted to linkedin, skipping" );
@@ -290,7 +293,13 @@ sub announce {
         }
         elsif ($self->feed->{linkedin}) {
             unless ($self->dry_run) {
-                die "Didn't announce on linkedin" unless $result = $self->feed->{linkedin}->announce( %event );
+                die "Didn't announce on linkedin" unless $result = $self->feed->{linkedin}->announce(
+                    %event,
+                    description => [
+                        $event{description},
+                        "RSVP at Meetup - $event->{meetup_link}",
+                    ],
+                );
                 $self->logger->info( "\"$event{title}\" ($uuid) announced to linkedin" );
                 $result = $self->history->update( $uuid => did_linkedin => 1 );
                 push @report, "Announced on linkedin";
@@ -309,7 +318,13 @@ sub announce {
         }
         elsif ($self->feed->{greymatter}) {
             unless ($self->dry_run) {
-                die "Didn't announce on greymatter" unless $result = $self->feed->{greymatter}->announce( %event );
+                die "Didn't announce on greymatter" unless $result = $self->feed->{greymatter}->announce(
+                    %event,
+                    description => [
+                        $event{description},
+                        "\nRSVP at Meetup - <a href=\"$event->{meetup_link}\">$event->{meetup_link}</a>"
+                    ],
+                );
                 $self->logger->info( "\"$event{title}\" ($uuid) announced to greymatter" );
                 $result = $self->history->update( $uuid => did_greymatter => 1 );
                 push @report, "Announced on greymatter";
@@ -357,10 +372,12 @@ sub template {
     my $datetime = DateTimeX::Easy->parse( '4th tuesday' );
     my $venue = $self->config->{venue} || '';
     $datetime = DateTimeX::Easy->parse( '3rd tuesday' ) unless $datetime;
-    $datetime->set(hour => 19, minute => 0, second => 0);
+    $datetime->set(hour => 20, minute => 0, second => 0);
 
     return <<_END_;
 # App-PM-Announce
+# You can leave 'venue' blank to use the default venue (per @{[ $self->config_file ]})
+# The 'datetime' field is the date & time that the event will take place. Any reasonable string should do (parsed via DateTimeX::Easy)
 ---
 title: The title of the event
 venue: $venue
