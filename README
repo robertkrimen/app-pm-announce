@@ -2,7 +2,7 @@ NAME
     App::PM::Announce -
 
 VERSION
-    Version 0.02
+    Version 0.021
 
 SYNOPSIS
         # Using the commandline...

@@ -2,6 +2,10 @@ TODO:
     - Image fetching/uploading
     - Support more Meetup options
 
+0.022 Monday April 06 13:18:09 PDT 2009:
+    - Added 'config edit' command
+    - Clarified some documentation
+
 0.021 Sunday April 05 19:54:40 PDT 2009:
     - Include Directory::Scratch prerequisite
 

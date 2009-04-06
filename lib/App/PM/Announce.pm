@@ -5,16 +5,15 @@ use strict;
 
 =head1 NAME
 
-App::PM::Announce -
-
+App::PM::Announce - Announce your PM meeting via Meetup and LinkedIn
 
 =head1 VERSION
 
-Version 0.021
+Version 0.022
 
 =cut
 
-our $VERSION = '0.021';
+our $VERSION = '0.022';
 
 use Moose;
 #with 'MooseX::LogDispatch';
@@ -352,6 +351,7 @@ sub announce {
 #    return \%result;
 }
 
+use Data::Dump qw/dd pp/;
 sub parse {
     my $self = shift;
 
@@ -391,10 +391,15 @@ _END_
 
 =head1 SYNOPSIS
 
-    # Using the commandline...
+    # Initialize and edit the config (only need to do this once)
+    pm-announce config edit
+    
+    # Generate a template for the event
     pm-announce template > event.txt
 
     # Edit event.txt with your editor of choice...
+
+    # Announce the event
     pm-announce announce < event.txt
 
 =head1 DESCRIPTION
@@ -403,13 +408,15 @@ App::PM::Announce is a tool for creating and advertising PM meetings (on Meetup,
 
     OPTIONS
 
-        verbose|v   Debugging mode. Be verbose when reporting
-        help|h|?    This help screen
-        dry-run|n   Don't actually login and announce, just show what would be done
+        -v, -d,  --verbose   Debugging mode. Be verbose when reporting
+        -h, -?,  --help      This help screen
+        -n,      --dry-run   Don't actually login and announce, just show what would be done
 
     COMMANDS
 
-        config              Check the config file (@{[ app->config_file ]})
+        config              Check the config file ($HOME/.app-pm-announce/config)
+
+        config edit         Edit the config file using $EDITOR
 
         history             Show announcement history
 

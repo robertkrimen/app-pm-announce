@@ -9,6 +9,7 @@ use App::PM::Announce::Util;
 use DateTime;
 use Text::Table;
 use Data::Dump qw/dd pp dump/;
+use Document::Stembolt;
 
 my $app;
 my @app;
@@ -25,13 +26,15 @@ Usage:
 
 OPTIONS
 
-    verbose|v   Debugging mode. Be verbose when reporting
-    help|h|?    This help screen
-    dry-run|n   Don't actually login and announce, just show what would be done
+    -v, -d,  --verbose   Debugging mode. Be verbose when reporting
+    -h, -?,  --help      This help screen
+    -n,      --dry-run   Don't actually login and announce, just show what would be done
 
 COMMANDS
 
     config              Check the config file (@{[ app->config_file ]})
+
+    config edit         Edit the config file using \$EDITOR ($ENV{EDITOR})
 
     history             Show announcement history
 
@@ -47,10 +50,15 @@ COMMANDS
 
 SYNOPSIS
 
-    # Using the commandline...
+    # Initialize and edit the config (only need to do this once)
+    pm-announce config edit
+    
+    # Generate a template for the event
     pm-announce template > event.txt
 
     # Edit event.txt with your editor of choice...
+
+    # Announce the event
     pm-announce announce < event.txt
 
 _END_
@@ -72,18 +80,28 @@ sub run {
             help => sub {
                 help;
             },
-            config => sub {
-                my ($context, @arguments) = @_;
-                my $config = app->config;
-                print "\n";
-                print "Using config file: ", app->config_file, "\n";
-                print "\n";
-                print pp $config;
-                print "\n\n";
-                print "Configured to announce to: ", join ", ", grep { app->config->{feed}->{$_} } qw/meetup linkedin greymatter/;
-                print "\n";
-#                print "$_ is ", ! app->config->{feed}->{$_} ? "NOT " : "", "configured\n" for qw/meetup linkedin greymatter/;
-                print "\n";
+            config => {
+                run => sub {
+                    my ($context, @arguments) = @_;
+                    return if @arguments;
+                    my $config = app->config;
+                    print "\n";
+                    print "Using config file: ", app->config_file, "\n";
+                    print "\n";
+                    print pp $config;
+                    print "\n\n";
+                    print "Configured to announce to: ", join ", ", grep { app->config->{feed}->{$_} } qw/meetup linkedin greymatter/;
+                    print "\n";
+    #                print "$_ is ", ! app->config->{feed}->{$_} ? "NOT " : "", "configured\n" for qw/meetup linkedin greymatter/;
+                    print "\n";
+                },
+
+                commands => {
+                    edit => sub {
+                        my ($context, @arguments) = @_;
+                        Document::Stembolt::_edit_file( app->config_file );
+                    },
+                },
             },
             test => sub {
                 my ($context, @arguments) = @_;
