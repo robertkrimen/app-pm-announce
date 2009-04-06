@@ -8,6 +8,7 @@ use App::PM::Announce;
 use App::PM::Announce::Util;
 use DateTime;
 use Text::Table;
+use Data::Dump qw/dd pp dump/;
 
 my $app;
 my @app;
@@ -39,6 +40,19 @@ Which will submit an announcement to:
 _END_
         },
         commands => {
+            config => sub {
+                my ($context, @arguments) = @_;
+                my $config = app->config;
+                print "\n";
+                print "Using config file: ", app->config_file, "\n";
+                print "\n";
+                print pp $config;
+                print "\n\n";
+                print "Configured to announce to: ", join ", ", grep { app->config->{feed}->{$_} } qw/meetup linkedin greymatter/;
+                print "\n";
+#                print "$_ is ", ! app->config->{feed}->{$_} ? "NOT " : "", "configured\n" for qw/meetup linkedin greymatter/;
+                print "\n";
+            },
             test => sub {
                 my ($context, @arguments) = @_;
                 $app = App::PM::Announce->new(config_default => {
@@ -81,7 +95,7 @@ _END_
                 if ($event) {
                     print "\n";
                     print join "\n", @$report, '', '' if @$report;
-                    print "\"$event->{title}\" has been announced on ", join( ', ', map { $event->{"did_$_"} ? $_ : () } qw/meetup linkedin greymatter/ ), "\n";
+                    print "\"$event->{title}\" has been announced on: ", join( ', ', map { $event->{"did_$_"} ? $_ : () } qw/meetup linkedin greymatter/ ), "\n";
                     print "The Meetup link is $event->{meetup_link}", "\n" if $event->{meetup_link};
                     print "\n";
                 }
