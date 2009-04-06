@@ -2,7 +2,10 @@ TODO:
     - Image fetching/uploading
     - Support more Meetup options
 
-0.02 Sunday April 05 19:14:06 PDT 2009:
+0.021 Sunday April 05 19:54:40 PDT 2009:
+    - Include Directory::Scratch prerequisite
+
+0.020 Sunday April 05 19:14:06 PDT 2009:
     - Improved template (with help)
     - Fixed link formatting for linkedin/greymatter
     - Make sure to post the right event hour
@@ -17,6 +20,6 @@ TODO:
     - Abort unless have meetup_uri
     - Change greymatter121c => greymatter
 
-0.01_1 2009-04-02:
+0.010_1 2009-04-02:
     - Initial release
 

@@ -23,6 +23,7 @@ resources repository => 'http://github.com/robertkrimen/app-pm-announce/tree/mas
 {
     map { my ($pk, $vr) = split m/\s/; build_requires $pk => $vr || 0 } grep { ! /^\s*#/ } split m/\n/, <<_END_;
 Test::Most
+Directory::Scratch
 _END_
 
     map { my ($pk, $vr) = split m/\s/; requires $pk => $vr || 0 } grep { ! /^\s*#/ } split m/\n/, <<_END_;
