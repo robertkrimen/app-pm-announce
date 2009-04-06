@@ -19,12 +19,11 @@ lib/App/PM/Announce.pm
 lib/App/PM/Announce/.Feed.pm.swp
 lib/App/PM/Announce/App.pm
 lib/App/PM/Announce/Feed.pm
-lib/App/PM/Announce/Feed/.greymatter121c.pm.swp
-lib/App/PM/Announce/Feed/.meetup.pm.swp
-lib/App/PM/Announce/Feed/greymatter121c.pm
+lib/App/PM/Announce/Feed/greymatter.pm
 lib/App/PM/Announce/Feed/linkedin.pm
 lib/App/PM/Announce/Feed/meetup.pm
 lib/App/PM/Announce/History.pm
+lib/App/PM/Announce/Util.pm
 META.yml
 script/pm-announce
 t/000-load.t
@@ -33,8 +32,7 @@ t/002-config.t
 t/003-parse.t
 t/004-history.t
 t/assets/home/config
-t/prototype/.02-linkedin.t.swp
-t/prototype/01-greymatter121c.t
+t/prototype/01-greymatter.t
 t/prototype/02-linkedin.t
 t/prototype/03-meetup.t
 t/release/boilerplate.t

@@ -28,6 +28,11 @@ _END_
     map { my ($pk, $vr) = split m/\s/; requires $pk => $vr || 0 } grep { ! /^\s*#/ } split m/\n/, <<_END_;
 Config::General
 Config::JFDI
+Data::Dump
+Data::UUID
+Date::Manip
+DateTime
+DateTimeX::Easy
 DBD::SQLite
 DBI
 DBIx::Simple
@@ -37,11 +42,15 @@ File::HomeDir
 Getopt::Chain
 HTML::TreeBuilder
 HTTP::Request::Common
+JSON
 Log::Dispatch
 Moose
 #MooseX::LogDispatch
 Path::Class
+SQL::Script
+Scalar::Util
 String::Util
+Text::Table
 WWW::Mechanize
 _END_
 }

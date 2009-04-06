@@ -10,11 +10,11 @@ App::PM::Announce -
 
 =head1 VERSION
 
-Version 0.01_1
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01_1';
+our $VERSION = '0.02';
 
 use Moose;
 #with 'MooseX::LogDispatch';
