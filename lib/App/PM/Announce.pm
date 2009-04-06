@@ -111,7 +111,7 @@ sub _build_logger {
         return $message;
     } );
     $logger->add( Log::Dispatch::Screen->new( name => 'screen', min_level => $self->debug ? 'debug' : 'info', stderr => 1 ) ) if $self->debug;
-    $logger->add( Log::Dispatch::File->new( name => 'file', mode => 'append', min_level => 'info', filename => $self->log_file.'' ) );
+#    $logger->add( Log::Dispatch::File->new( name => 'file', mode => 'append', min_level => 'info', filename => $self->log_file.'' ) );
     return $logger;
 }
 
@@ -180,6 +180,9 @@ sub startup {
         $home_dir->mkpath;
     }
 
+    # Gotta do this here
+    $self->logger->add( Log::Dispatch::File->new( name => 'file', mode => 'append', min_level => 'info', filename => $self->log_file.'' ) );
+
     my $config_file = $self->config_file;
     $self->logger->debug( "config_file = $config_file" );
 
@@ -189,7 +192,34 @@ sub startup {
     unless (-f $config_file) {
         $self->logger->debug( "Making $config_file stub because it does not exist" );
         $config_file->openw->print( <<_END_ );
-# This is a config stub
+# vim: set filetype=configgeneral:
+
+# Replace 'An-Example-Group' with the real resource for your Meetup group
+# Replace <venue> with the venue number you want to be the default
+
+#<feed meetup>
+#    username
+#    password
+#    uri http://www.meetup.com/An-Example-Group/calendar/?action=new
+#    venue <venue>
+#</feed>
+
+# Replace <gid> with the gid of your group
+
+#<feed linkedin>
+#    username
+#    password
+#    uri http://www.linkedin.com/groupAnswers?start=&gid=<gid>
+#</feed>
+
+# Replace 'example.com' with a real host
+
+#<feed greymatter>
+#    username
+#    password
+#    uri http://example.com/cgi-bin/greymatter/gm.cgi
+#</feed>
+
 _END_
     }
 }
