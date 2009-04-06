@@ -41,6 +41,21 @@ sub BUILD {
     $self->startup;
 }
 
+has debug => qw/is ro lazy_build 1/;
+sub _build_debug {
+    return $ENV{APP_PM_ANNOUNCE_DEBUG} ? 1 : 0;
+}
+
+has verbose => qw/is ro lazy_build 1/;
+sub _build_verbose {
+    return 0;
+}
+
+has dry_run => qw/is ro lazy_build 1/;
+sub _build_dry_run {
+    return 0;
+}
+
 has home_dir => qw/is ro lazy_build 1/;
 sub _build_home_dir {
     my @home_dir;
@@ -81,11 +96,6 @@ sub _build_config {
 has log_file => qw/is ro lazy_build 1/;
 sub _build_log_file {
     return shift->home_dir->file( 'log' );
-}
-
-has debug => qw/is ro lazy_build 1/;
-sub _build_debug {
-    return $ENV{APP_PM_ANNOUNCE_DEBUG} ? 1 : 0;
 }
 
 has logger => qw/is ro isa Log::Dispatch lazy_build 1/;
@@ -158,6 +168,10 @@ sub _build_history {
 sub startup {
     my $self = shift;
 
+    $self->logger->debug( "debug = " . $self->debug );
+    $self->logger->debug( "verbose = " . $self->verbose );
+    $self->logger->debug( "dry-run = " . $self->dry_run );
+
     my $home_dir = $self->home_dir;
     $self->logger->debug( "home_dir = $home_dir" );
 
@@ -220,18 +234,23 @@ sub announce {
             push @report, "Already announced on meetup";
         }
         elsif ($self->feed->{meetup}) {
-            die "Didn't announce on meetup" unless $result = $self->feed->{meetup}->announce( %event );
-            my $meetup_link = $event->{meetup_link} = $result->{meetup_link};
-            $self->logger->debug( "Meetup link is " . $meetup_link );
-            $self->logger->info( "\"$event{title}\" ($uuid) announced to meetup ($meetup_link) " );
-            $self->history->update( $uuid => did_meetup => 1, meetup_link => "$meetup_link" );
-            push @report, "Announced on meetup";
+            unless ($self->dry_run) {
+                die "Didn't announce on meetup" unless $result = $self->feed->{meetup}->announce( %event );
+                my $meetup_link = $event->{meetup_link} = $result->{meetup_link};
+                $self->logger->debug( "Meetup link is " . $meetup_link );
+                $self->logger->info( "\"$event{title}\" ($uuid) announced to meetup ($meetup_link) " );
+                $self->history->update( $uuid => did_meetup => 1, meetup_link => "$meetup_link" );
+                push @report, "Announced on meetup";
+            }
+            else {
+                push @report, "Would announce on meetup";
+            }
         }
         else {
             $self->logger->debug( "No feed configured for meetup" );
         }
 
-        die "Don't have a Meetup link" unless $event->{meetup_link};
+        die "Don't have a Meetup link" unless $self->dry_run || $event->{meetup_link};
 
         $event{description} = [ $event{description}, $event->{meetup_link} ];
 
@@ -240,10 +259,15 @@ sub announce {
             push @report, "Already announced on linkedin";
         }
         elsif ($self->feed->{linkedin}) {
-            die "Didn't announce on linkedin" unless $result = $self->feed->{linkedin}->announce( %event );
-            $self->logger->info( "\"$event{title}\" ($uuid) announced to linkedin" );
-            $result = $self->history->update( $uuid => did_linkedin => 1 );
-            push @report, "Announced on linkedin";
+            unless ($self->dry_run) {
+                die "Didn't announce on linkedin" unless $result = $self->feed->{linkedin}->announce( %event );
+                $self->logger->info( "\"$event{title}\" ($uuid) announced to linkedin" );
+                $result = $self->history->update( $uuid => did_linkedin => 1 );
+                push @report, "Announced on linkedin";
+            }
+            else {
+                push @report, "Would announce on linkedin";
+            }
         }
         else {
             $self->logger->debug( "No feed configured for linkedin" );
@@ -254,17 +278,22 @@ sub announce {
             push @report, "Already announced on greymatter";
         }
         elsif ($self->feed->{greymatter}) {
-            die "Didn't announce on greymatter" unless $result = $self->feed->{greymatter}->announce( %event );
-            $self->logger->info( "\"$event{title}\" ($uuid) announced to greymatter" );
-            $result = $self->history->update( $uuid => did_greymatter => 1 );
-            push @report, "Announced on greymatter";
+            unless ($self->dry_run) {
+                die "Didn't announce on greymatter" unless $result = $self->feed->{greymatter}->announce( %event );
+                $self->logger->info( "\"$event{title}\" ($uuid) announced to greymatter" );
+                $result = $self->history->update( $uuid => did_greymatter => 1 );
+                push @report, "Announced on greymatter";
+            }
+            else {
+                push @report, "Would announce on greymatter";
+            }
         }
         else {
             $self->logger->debug( "No feed configured for greymatter" );
         }
     };
     if ($@) {
-        warn "Unable to announce \"$event->{title}\" ($uuid)\n";
+        warn "Unable to announce \"$event{title}\" ($uuid)\n";
         die $@;
     }
 

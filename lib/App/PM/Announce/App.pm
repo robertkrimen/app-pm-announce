@@ -17,10 +17,11 @@ sub app {
 
 sub run {
     Getopt::Chain->process(
-        options => [qw/ verbose|v /],
+        options => [qw/ verbose|v dry-run|n /],
         run => sub {
             my ($context, @arguments) = @_;
-            push @app, qw/debug 1/ if $context->option( 'verbose' );
+            push @app, qw/debug 1 verbose 1/ if $context->option( 'verbose' );
+            push @app, qw/dry_run 1/ if $context->option( 'dry-run' );
             return if @arguments;
             app;
             print <<_END_;
@@ -79,7 +80,7 @@ _END_
                 my ($event, $report) = app->announce( \*STDIN );
                 if ($event) {
                     print "\n";
-                    print join "\n", @$report, '', '';
+                    print join "\n", @$report, '', '' if @$report;
                     print "\"$event->{title}\" has been announced on ", join( ', ', map { $event->{"did_$_"} ? $_ : () } qw/meetup linkedin greymatter/ ), "\n";
                     print "The Meetup link is $event->{meetup_link}", "\n" if $event->{meetup_link};
                     print "\n";
