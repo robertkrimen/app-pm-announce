@@ -7,6 +7,7 @@ use strict;
 
 App::PM::Announce -
 
+
 =head1 VERSION
 
 Version 0.01_1
@@ -16,7 +17,7 @@ Version 0.01_1
 our $VERSION = '0.01_1';
 
 use Moose;
-with 'MooseX::LogDispatch';
+#with 'MooseX::LogDispatch';
 
 use File::HomeDir;
 use Path::Class;
@@ -26,6 +27,9 @@ use String::Util qw/trim/;
 use Data::UUID;
 use Document::Stembolt;
 use DateTimeX::Easy;
+use Log::Dispatch;
+use Log::Dispatch::Screen;
+use Log::Dispatch::File;
 
 use App::PM::Announce::History;
 use App::PM::Announce::Feed::meetup;
@@ -72,6 +76,33 @@ sub _build_config {
         -ConfigFile => $self->config_file,
         -DefaultConfig => $self->config_default,
     )->getall };
+}
+
+has log_file => qw/is ro lazy_build 1/;
+sub _build_log_file {
+    return shift->home_dir->file( 'log' );
+}
+
+has debug => qw/is ro lazy_build 1/;
+sub _build_debug {
+    return $ENV{APP_PM_ANNOUNCE_DEBUG} ? 1 : 0;
+}
+
+has logger => qw/is ro isa Log::Dispatch lazy_build 1/;
+sub _build_logger {
+    my $self = shift;
+    my $logger = Log::Dispatch->new( callbacks => sub {
+        my $message = join ' ',
+                "[@{[ DateTime->now->set_time_zone( 'local' ) ]}]",
+                "[$_[3]]",
+                "$_[1]\n",
+        ;
+#        $message = "# $message" if $_[3] eq 'debug';
+        return $message;
+    } );
+    $logger->add( Log::Dispatch::Screen->new( name => 'screen', min_level => $self->debug ? 'debug' : 'info', stderr => 1 ) ) if $self->debug;
+    $logger->add( Log::Dispatch::File->new( name => 'file', mode => 'append', min_level => 'info', filename => $self->log_file.'' ) );
+    return $logger;
 }
 
 has feed => qw/is ro isa HashRef lazy_build 1/;
@@ -128,18 +159,21 @@ sub startup {
     my $self = shift;
 
     my $home_dir = $self->home_dir;
-    $self->logger->debug( "home_dir is $home_dir" );
+    $self->logger->debug( "home_dir = $home_dir" );
 
     unless (-d $home_dir) {
-        $self->logger->debug( "making $home_dir because it does not exist" );
+        $self->logger->debug( "Making $home_dir because it does not exist" );
         $home_dir->mkpath;
     }
 
     my $config_file = $self->config_file;
-    $self->logger->debug( "config_file is $config_file" );
+    $self->logger->debug( "config_file = $config_file" );
+
+    my $log_file = $self->log_file;
+    $self->logger->debug( "log_file = $log_file" );
 
     unless (-f $config_file) {
-        $self->logger->debug( "making $config_file stub because it does not exist" );
+        $self->logger->debug( "Making $config_file stub because it does not exist" );
         $config_file->openw->print( <<_END_ );
 # This is a config stub
 _END_
@@ -174,40 +208,74 @@ sub announce {
         die "The date & time isn't a DateTime object\n" unless $event{datetime}->isa( 'DateTime' );
     }
 
-    my ($event, $result);
+    my (@report, $event, $result);
     my $uuid = $event{uuid};
     $event = $self->history->find_or_insert( $uuid )->{data};
     $self->history->update( $uuid => %event );
 
-    if ($event->{did_meetup}) {
-        $self->logger->debug( "Already posted to meetup, skipping" );
-        $self->logger->debug( "meetup_uri is " . $event->{meetup_uri} );
-    }
-    else {
-        die "Didn't announce on meetup" unless $result = $self->feed->{meetup}->announce( %event );
-        my $meetup_uri = $event->{meetup_uri} = $result->{meetup_uri};
-        die "Didn't get back a meetup uri" unless $meetup_uri;
-        $self->logger->debug( "meetup_uri is " . $meetup_uri );
-        $self->history->update( $uuid => did_meetup => 1, meetup_uri => "$meetup_uri" );
+    eval {
+        if ($event->{did_meetup}) {
+            $self->logger->debug( "Already posted to meetup, skipping" );
+            $self->logger->debug( "The Meetup link is " . $event->{meetup_link} ) if $event->{meetup_link};
+            push @report, "Already announced on meetup";
+        }
+        elsif ($self->feed->{meetup}) {
+            die "Didn't announce on meetup" unless $result = $self->feed->{meetup}->announce( %event );
+            my $meetup_link = $event->{meetup_link} = $result->{meetup_link};
+            $self->logger->debug( "Meetup link is " . $meetup_link );
+            $self->logger->info( "\"$event{title}\" ($uuid) announced to meetup ($meetup_link) " );
+            $self->history->update( $uuid => did_meetup => 1, meetup_link => "$meetup_link" );
+            push @report, "Announced on meetup";
+        }
+        else {
+            $self->logger->debug( "No feed configured for meetup" );
+        }
+
+        die "Don't have a Meetup link" unless $event->{meetup_link};
+
+        $event{description} = [ $event{description}, $event->{meetup_link} ];
+
+        if ($event->{did_linkedin}) {
+            $self->logger->debug( "Already posted to linkedin, skipping" );
+            push @report, "Already announced on linkedin";
+        }
+        elsif ($self->feed->{linkedin}) {
+            die "Didn't announce on linkedin" unless $result = $self->feed->{linkedin}->announce( %event );
+            $self->logger->info( "\"$event{title}\" ($uuid) announced to linkedin" );
+            $result = $self->history->update( $uuid => did_linkedin => 1 );
+            push @report, "Announced on linkedin";
+        }
+        else {
+            $self->logger->debug( "No feed configured for linkedin" );
+        }
+
+        if ($event->{did_greymatter}) {
+            $self->logger->debug( "Already posted to greymatter, skipping" );
+            push @report, "Already announced on greymatter";
+        }
+        elsif ($self->feed->{greymatter}) {
+            die "Didn't announce on greymatter" unless $result = $self->feed->{greymatter}->announce( %event );
+            $self->logger->info( "\"$event{title}\" ($uuid) announced to greymatter" );
+            $result = $self->history->update( $uuid => did_greymatter => 1 );
+            push @report, "Announced on greymatter";
+        }
+        else {
+            $self->logger->debug( "No feed configured for greymatter" );
+        }
+    };
+    if ($@) {
+        warn "Unable to announce \"$event->{title}\" ($uuid)\n";
+        die $@;
     }
 
-    $event{description} = [ $event{description}, $event->{meetup_uri} ];
+    $event = $self->history->fetch( $uuid )->{data};
+#    $self->logger->info("\"$event{title}\" is announced on", join ', ', map { $event->{"did_$_"} ? $_ : () } qw/meetup linkedin greymatter/);
+#    $self->logger->info("Meetup link is $event->{meetup_link}") if $event->{meetup_link};
 
-    if ($event->{did_linkedin}) {
-        $self->logger->debug( "Already posted to linkedin, skipping" );
-    }
-    else {
-        die "Didn't announce on greymatter" unless $result = $self->feed->{linkedin}->announce( %event );
-        $self->history->update( $uuid => did_linkedin => 1 );
-    }
-
-    if ($event->{did_greymatter}) {
-        $self->logger->debug( "Already posted to greymatter, skipping" );
-    }
-    else {
-        die "Didn't announce on greymatter" unless $result = $self->feed->{greymatter}->announce( %event );
-        $self->history->update( $uuid => did_greymatter => 1 );
-    }
+    return $event, \@report;
+    
+#    $result{done} = 1;
+#    return \%result;
 }
 
 sub parse {

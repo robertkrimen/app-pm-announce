@@ -10,15 +10,19 @@ use DateTime;
 use Text::Table;
 
 my $app;
+my @app;
 sub app {
-    return $app ||= App::PM::Announce->new;
+    return $app ||= App::PM::Announce->new(@app);
 }
 
 sub run {
     Getopt::Chain->process(
+        options => [qw/ verbose|v /],
         run => sub {
             my ($context, @arguments) = @_;
+            push @app, qw/debug 1/ if $context->option( 'verbose' );
             return if @arguments;
+            app;
             print <<_END_;
 
 The only thing you can do right now:
@@ -72,7 +76,14 @@ _END_
             },
             announce => sub {
                 my ($context, @arguments) = @_;
-                app->announce( \*STDIN );
+                my ($event, $report) = app->announce( \*STDIN );
+                if ($event) {
+                    print "\n";
+                    print join "\n", @$report, '', '';
+                    print "\"$event->{title}\" has been announced on ", join( ', ', map { $event->{"did_$_"} ? $_ : () } qw/meetup linkedin greymatter/ ), "\n";
+                    print "The Meetup link is $event->{meetup_link}", "\n" if $event->{meetup_link};
+                    print "\n";
+                }
             },
             history => sub {
                 my ($context, @arguments) = @_;
@@ -86,7 +97,7 @@ _END_
 
 $event->{uuid}
 $data->{title}
-$data->{meetup_uri}
+$data->{meetup_link}
 
 _END_
                     }

@@ -37,8 +37,9 @@ File::HomeDir
 Getopt::Chain
 HTML::TreeBuilder
 HTTP::Request::Common
+Log::Dispatch
 Moose
-MooseX::LogDispatch
+#MooseX::LogDispatch
 Path::Class
 String::Util
 WWW::Mechanize

@@ -21,14 +21,14 @@ sub _build_agent {
 
 sub get {
     my $self = shift;
-    $self->logger->debug( "get $_[0]" );
+    $self->logger->debug( "GET $_[0]" );
     $self->agent->request( GET @_ );
 #    $self->agent->get( @_ );
 }
 
 sub post {
     my $self = shift;
-    $self->logger->debug( "post $_[0]" );
+    $self->logger->debug( "POST $_[0]" );
 #    $self->agent->post( @_ );
     $self->agent->request( POST @_ );
 }

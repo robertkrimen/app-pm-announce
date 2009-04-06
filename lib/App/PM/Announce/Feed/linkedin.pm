@@ -17,7 +17,7 @@ sub announce {
 
     $self->get( "https://www.linkedin.com/secure/login" );
 
-    $self->logger->debug( "login as $username/$password" );
+    $self->logger->debug( "Login as $username / $password" );
 
     $self->submit_form(
         fields => {
@@ -45,7 +45,9 @@ sub announce {
 
     die "Not sure if discussion was posted" unless $self->content =~ m/Your discussion has been posted successfully/;
 
-    $self->logger->debug( "submitted to linkedin at $uri" );
+    $self->logger->debug( "Submitted to linkedin at $uri" );
+
+    return 1;
 }
 
 1;

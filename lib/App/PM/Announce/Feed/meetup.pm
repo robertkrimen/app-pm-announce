@@ -20,7 +20,7 @@ sub announce {
 
     $self->get("http://www.meetup.com/login/");
 
-    $self->logger->debug( "login as $username/$password" );
+    $self->logger->debug( "Login as $username / $password" );
 
     $self->submit_form(
         fields => {
@@ -62,12 +62,12 @@ sub announce {
 
     my $href = $a->attr( 'href' );
 
-    my $meetup_uri = URI->new( $href );
-    $meetup_uri->query( undef );
+    my $meetup_link = URI->new( $href );
+    $meetup_link->query( undef );
 
-    $self->logger->debug( "submitted to meetup at $uri" );
+    $self->logger->debug( "Submitted to meetup at $uri" );
 
-    return { meetup_uri => $meetup_uri };
+    return { meetup_link => $meetup_link };
 }
 
 1;
