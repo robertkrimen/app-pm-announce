@@ -11,6 +11,8 @@ use Text::Table;
 use Data::Dump qw/dd pp dump/;
 use Document::Stembolt;
 
+my @feeds = @App::PM::Announce::Feed::feeds;
+
 my $app;
 my @app;
 sub app {
@@ -22,31 +24,30 @@ sub help {
 
 Usage:
 
-    $0 [OPTIONS] <COMMAND>
+    $0 -[vdh?] <COMMAND>
 
-OPTIONS
+        -v, -d,  --verbose  Debugging mode. Be verbose when reporting
+        -h, -?,  --help     This help screen
 
-    -v, -d,  --verbose   Debugging mode. Be verbose when reporting
-    -h, -?,  --help      This help screen
-    -n,      --dry-run   Don't actually login and announce, just show what would be done
+    config                  Check the config file (@{[ app->config_file ]})
 
-COMMANDS
+    config edit             Edit the config file using \$EDITOR ($ENV{EDITOR})
 
-    config              Check the config file (@{[ app->config_file ]})
+    history                 Show announcement history
 
-    config edit         Edit the config file using \$EDITOR ($ENV{EDITOR})
+    history <query>         Show announcement history for event <query>, where <query> should be enough of the uuid to be unambiguous
 
-    history             Show announcement history
+    template                Print out a template to be used for input to the 'announce' command
 
-    history <query>     Show announcement history for event <query>, where <query> should be enough of the uuid to be unambiguous
+        --image <image>     Attach <image> (can be either a local file or remote URL) to the Meetup event
 
-    template            Print out a template to be used for input to the 'announce' command
+    announce                Read STDIN for the event information and make a post for each feed
 
-    announce            Read STDIN for the event information and make a post for each feed
+        -n, --dry-run       Don't actually login and announce, just show what would be done
 
-    test                Post a bogus event to a test meetup account, test linkedin account, and test greymatter account
+    test                    Post a bogus event to a test meetup account, test linkedin account, and test greymatter account
 
-    help                This help screen
+    help                    This help screen
 
 SYNOPSIS
 
@@ -90,9 +91,8 @@ sub run {
                     print "\n";
                     print pp $config;
                     print "\n\n";
-                    print "Configured to announce to: ", join ", ", grep { app->config->{feed}->{$_} } qw/meetup linkedin greymatter/;
+                    print "Configured to announce to: ", join ", ", grep { app->config->{feed}->{$_} } @feeds;
                     print "\n";
-    #                print "$_ is ", ! app->config->{feed}->{$_} ? "NOT " : "", "configured\n" for qw/meetup linkedin greymatter/;
                     print "\n";
                 },
 
@@ -135,9 +135,12 @@ sub run {
                     datetime => DateTime->now->add(days => 10),
                 );
             },
-            template => sub {
-                my ($context, @arguments) = @_;
-                print STDOUT app->template;
+            template => {
+                options => [ 'image=s' ],
+                run => sub {
+                    my ($context, @arguments) = @_;
+                    print STDOUT app->template( image => $context->option( 'image' ) || '' );
+                },
             },
             announce => sub {
                 my ($context, @arguments) = @_;
@@ -145,7 +148,7 @@ sub run {
                 if ($event) {
                     print "\n";
                     print join "\n", @$report, '', '' if @$report;
-                    print "\"$event->{title}\" has been announced on: ", join( ', ', map { $event->{"did_$_"} ? $_ : () } qw/meetup linkedin greymatter/ ), "\n";
+                    print "\"$event->{title}\" has been announced on: ", join( ', ', map { $event->{"did_$_"} ? $_ : () } @feeds ), "\n";
                     print "The Meetup link is $event->{meetup_link}", "\n" if $event->{meetup_link};
                     print "\n";
                 }
@@ -165,7 +168,7 @@ $event->{uuid}
 $data->{meetup_link}
 _END_
                         print "Made ", App::PM::Announce::Util->age( $event->{insert_datetime} ) . ' ago', " (", $event->{insert_datetime}, ")\n";
-                        print "Announced on ", join( ', ', map { $data->{"did_$_"} ? $_ : () } qw/meetup linkedin greymatter/ ), "\n";
+                        print "Announced on ", join( ', ', map { $data->{"did_$_"} ? $_ : () } @feeds ), "\n";
                         print "\n";
 
                     }
@@ -176,12 +179,12 @@ _END_
                     my @table = map {
                         my $data = $_->{data};
                         my $did;
-                        $did += $data->{"did_$_"} ? 1 : 0 for qw/meetup linkedin greymatter/;
+                        $did += $data->{"did_$_"} ? 1 : 0 for @feeds;
                         [
                             $verbose ? $_->{uuid} : substr($_->{uuid}, 0, 8),
                             $data->{title},
                             $verbose ? $_->{insert_datetime} : App::PM::Announce::Util->age( $_->{insert_datetime} ) . ' ago',
-                            "$did/3"
+                            "$did/4"
                         ];
                     } app->history->all;
                     my $table = Text::Table->new( 'uuid', \' | ', 'title', \' | ', 'age', \' | ', 'did' )->load( @table );

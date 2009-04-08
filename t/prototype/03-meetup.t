@@ -21,6 +21,7 @@ $feed->announce(
     description => "Event description ($key)",
     venue => 920502,
     datetime => DateTime->now->add(days => 10),
+    image => Path::Class::File->new( 't/assets/bee.jpg' ),
 );
 
 ok(1);

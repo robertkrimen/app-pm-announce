@@ -9,6 +9,8 @@ use WWW::Mechanize;
 use HTTP::Request::Common qw/GET POST/;
 use HTML::TreeBuilder;
 
+my @feeds = qw/meetup linkedin greymatter useperl/;
+
 has app => qw/is ro isa App::PM::Announce required 1/, handles => [qw/ logger /];
 has username => qw/is ro isa Str required 1/;
 has password => qw/is ro isa Str required 1/;

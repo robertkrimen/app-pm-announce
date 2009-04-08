@@ -6,7 +6,29 @@ use strict;
 use Moose;
 extends 'App::PM::Announce::Feed';
 
+use File::Temp;
+
 has venue => qw/is ro/;
+
+sub fetch_image {
+    my $self = shift;
+    my $image = shift;
+
+    {
+        my $uri = $image;
+        my $response = $self->agent->get( $uri );
+        $self->logger->debug( "Fetching image at $uri" );
+        die "Unable to fetch image at $uri" unless $response->is_success;
+        die "File at $uri doesn't seem to be an image" unless my ($extension) = $response->header( 'Content-Type' ) =~ m/image\/(.*)/;
+#        $extension = "jpg";
+        my $image = File::Temp->new( UNLINK => 0, SUFFIX => ".$extension" );
+        $self->logger->debug( "Saving image to $image" );
+        print $image $response->decoded_content;
+        close $image or warn $!;
+        $self->logger->debug( "Saved " . -s "$image" );
+        return $image;
+    }
+}
 
 sub announce {
     my $self = shift;
@@ -33,6 +55,19 @@ sub announce {
 
     die "Wasn't logged in" unless $self->content =~ m/Your Meetup Groups/;
 
+    my %optional;
+    my ($image, $temporary_image);
+    if ($image = $event{image}) {
+
+        if ($image =~ m/^https?:\/\//) {
+            $image = $self->fetch_image( $image );
+            $temporary_image = 1;
+        }
+        
+        $optional{attachfile} = $image.'';
+        $self->logger->debug( "Attaching $image" );
+    }
+
     $self->get($uri);
 
     my $hour12 = $datetime->hour;
@@ -50,10 +85,13 @@ sub announce {
             'event.hour12' => $hour12,
             'event.minute' => $datetime->minute,
             'event.ampm' => $datetime->hour >= 12 ? 'PM' : 'AM',
+            %optional,
         },
         form_number => 1,
         button => 'submit_next',
     );
+
+    unlink $image or warn "Couldn't unlink $image: $!" if $temporary_image;
 
     my $tree = $self->tree;
 

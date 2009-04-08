@@ -1,9 +1,9 @@
 TODO:
-    - Image fetching/uploading
     - Support more Meetup options
 
-0.023 Wednesday April 08 00:52:18 PDT 2009:
+0.023 Wednesday April 08 13:44:36 PDT 2009
     - Added use.perl support
+    - Image fetching/uploading
 
 0.022 Monday April 06 13:18:09 PDT 2009:
     - Added 'config edit' command

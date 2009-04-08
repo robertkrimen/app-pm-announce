@@ -31,6 +31,8 @@ sub announce {
         password => $password,
     );
 
+    $self->logger->debug( "Promote as $promote" );
+
     $post->postentry(
         title => $self->format( \%event => 'title' ),
         text => $self->format( \%event => 'description' ),

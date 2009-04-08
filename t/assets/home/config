@@ -15,8 +15,14 @@ xyzzy 1
     uri http://www.linkedin.com/groupAnswers?start=&gid=1873425
 </feed>
 
-<feed greymatter121c>
+<feed greymatter>
     username alice8378
     password test8378
     uri http://72.14.179.195/cgi-bin/greymatter/gm.cgi
+</feed>
+
+<feed useperl>
+    username alice8378
+    password test8378
+    promote post
 </feed>

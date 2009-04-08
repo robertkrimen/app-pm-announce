@@ -9,11 +9,11 @@ App::PM::Announce - Announce your PM meeting via Meetup and LinkedIn
 
 =head1 VERSION
 
-Version 0.022
+Version 0.023
 
 =cut
 
-our $VERSION = '0.022';
+our $VERSION = '0.023';
 
 use Moose;
 #with 'MooseX::LogDispatch';
@@ -162,7 +162,7 @@ sub _build_greymatter_feed {
 
 sub _build_useperl_feed {
     my $self = shift;
-    return undef unless my $given = $self->config->{feed}->{greymatter};
+    return undef unless my $given = $self->config->{feed}->{useperl};
     return App::PM::Announce::Feed::useperl->new(
         app => $self,
         username => $given->{username},
@@ -230,6 +230,11 @@ sub startup {
 #    username
 #    password
 #    uri http://example.com/cgi-bin/greymatter/gm.cgi
+#</feed>
+
+#<feed useperl>
+#    username
+#    password
 #</feed>
 
 _END_
@@ -405,6 +410,7 @@ sub parse {
 
 sub template {
     my $self = shift;
+    my %given = @_;
 
     my $uuid = Data::UUID->new->create_str;
     my $datetime = DateTimeX::Easy->parse( '4th tuesday' );
@@ -420,6 +426,7 @@ sub template {
 title: The title of the event
 venue: $venue
 datetime: $datetime
+image: $given{image}
 uuid: $uuid
 ---
 Put your multi-line description for the event here.
@@ -444,29 +451,28 @@ _END_
 
 App::PM::Announce is a tool for creating and advertising PM meetings (on Meetup, LinkedIn, and blog software)
 
-    OPTIONS
-
-        -v, -d,  --verbose   Debugging mode. Be verbose when reporting
-        -h, -?,  --help      This help screen
-        -n,      --dry-run   Don't actually login and announce, just show what would be done
-
-    COMMANDS
+            -v, -d,  --verbose  Debugging mode. Be verbose when reporting
+            -h, -?,  --help     This help screen
 
         config              Check the config file ($HOME/.app-pm-announce/config)
 
-        config edit         Edit the config file using $EDITOR
+        config edit             Edit the config file using $EDITOR
 
-        history             Show announcement history
+        history                 Show announcement history
 
-        history <query>     Show announcement history for event <query>, where <query> should be enough of the uuid to be unambiguous
+        history <query>         Show announcement history for event <query>, where <query> should be enough of the uuid to be unambiguous
 
-        template            Print out a template to be used for input to the 'announce' command
+        template                Print out a template to be used for input to the 'announce' command
 
-        announce            Read STDIN for the event information and make a post for each feed
+            --image <image>     Attach <image> (can be either a local file or remote URL) to the Meetup event
 
-        test                Post a bogus event to a test meetup account, test linkedin account, and test greymatter account
+        announce                Read STDIN for the event information and make a post for each feed
 
-        help                This help screen
+            -n, --dry-run       Don't actually login and announce, just show what would be done
+
+        test                    Post a bogus event to a test meetup account, test linkedin account, and test greymatter account
+
+        help                    This help screen
 
 =cut
 
