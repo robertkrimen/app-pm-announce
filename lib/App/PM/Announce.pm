@@ -34,6 +34,7 @@ use App::PM::Announce::History;
 use App::PM::Announce::Feed::meetup;
 use App::PM::Announce::Feed::linkedin;
 use App::PM::Announce::Feed::greymatter;
+use App::PM::Announce::Feed::useperl;
 
 sub BUILD {
     my $self = shift;
@@ -121,6 +122,7 @@ sub _build_feed {
         meetup => $self->_build_meetup_feed,
         linkedin => $self->_build_linkedin_feed,
         greymatter => $self->_build_greymatter_feed,
+        useperl => $self->_build_useperl_feed,
     };
 }
 
@@ -136,6 +138,17 @@ sub _build_meetup_feed {
     );
 }
 
+sub _build_linkedin_feed {
+    my $self = shift;
+    return undef unless my $given = $self->config->{feed}->{linkedin};
+    return App::PM::Announce::Feed::linkedin->new(
+        app => $self,
+        username => $given->{username},
+        password => $given->{password},
+        uri => $given->{uri},
+    );
+}
+
 sub _build_greymatter_feed {
     my $self = shift;
     return undef unless my $given = $self->config->{feed}->{greymatter};
@@ -147,14 +160,14 @@ sub _build_greymatter_feed {
     );
 }
 
-sub _build_linkedin_feed {
+sub _build_useperl_feed {
     my $self = shift;
-    return undef unless my $given = $self->config->{feed}->{linkedin};
-    return App::PM::Announce::Feed::linkedin->new(
+    return undef unless my $given = $self->config->{feed}->{greymatter};
+    return App::PM::Announce::Feed::useperl->new(
         app => $self,
         username => $given->{username},
         password => $given->{password},
-        uri => $given->{uri},
+        promote => $given->{promote},
     );
 }
 
@@ -334,6 +347,31 @@ sub announce {
         }
         else {
             $self->logger->debug( "No feed configured for greymatter" );
+        }
+
+        if ($event->{did_useperl}) {
+            $self->logger->debug( "Already posted to useperl, skipping" );
+            push @report, "Already announced on useperl";
+        }
+        elsif ($self->feed->{useperl}) {
+            unless ($self->dry_run) {
+                die "Didn't announce on useperl" unless $result = $self->feed->{useperl}->announce(
+                    %event,
+                    description => [
+                        $event{description},
+                        "\nRSVP at Meetup - <a href=\"$event->{meetup_link}\">$event->{meetup_link}</a>"
+                    ],
+                );
+                $self->logger->info( "\"$event{title}\" ($uuid) announced to useperl" );
+                $result = $self->history->update( $uuid => did_useperl => 1 );
+                push @report, "Announced on useperl";
+            }
+            else {
+                push @report, "Would announce on useperl";
+            }
+        }
+        else {
+            $self->logger->debug( "No feed configured for useperl" );
         }
     };
     if ($@) {

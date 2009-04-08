@@ -53,6 +53,7 @@ Scalar::Util
 String::Util
 Text::Table
 WWW::Mechanize
+WWW::UsePerl::Journal::Post 
 _END_
 }
 
