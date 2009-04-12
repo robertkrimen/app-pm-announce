@@ -2,7 +2,7 @@ NAME
     App::PM::Announce - Announce your PM meeting via Meetup and LinkedIn
 
 VERSION
-    Version 0.022
+    Version 0.023
 
 SYNOPSIS
         # Initialize and edit the config (only need to do this once)
@@ -20,29 +20,28 @@ DESCRIPTION
     App::PM::Announce is a tool for creating and advertising PM meetings (on
     Meetup, LinkedIn, and blog software)
 
-        OPTIONS
-
-            -v, -d,  --verbose   Debugging mode. Be verbose when reporting
-            -h, -?,  --help      This help screen
-            -n,      --dry-run   Don't actually login and announce, just show what would be done
-
-        COMMANDS
+                -v, -d,  --verbose  Debugging mode. Be verbose when reporting
+                -h, -?,  --help     This help screen
 
             config              Check the config file ($HOME/.app-pm-announce/config)
 
-            config edit         Edit the config file using $EDITOR
+            config edit             Edit the config file using $EDITOR
 
-            history             Show announcement history
+            history                 Show announcement history
 
-            history <query>     Show announcement history for event <query>, where <query> should be enough of the uuid to be unambiguous
+            history <query>         Show announcement history for event <query>, where <query> should be enough of the uuid to be unambiguous
 
-            template            Print out a template to be used for input to the 'announce' command
+            template                Print out a template to be used for input to the 'announce' command
 
-            announce            Read STDIN for the event information and make a post for each feed
+                --image <image>     Attach <image> (can be either a local file or remote URL) to the Meetup event
 
-            test                Post a bogus event to a test meetup account, test linkedin account, and test greymatter account
+            announce                Read STDIN for the event information and make a post for each feed
 
-            help                This help screen
+                -n, --dry-run       Don't actually login and announce, just show what would be done
+
+            test                    Post a bogus event to a test meetup account, test linkedin account, and test greymatter account
+
+            help                    This help screen
 
 AUTHOR
     Robert Krimen, "<rkrimen at cpan.org>"
