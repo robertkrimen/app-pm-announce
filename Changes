@@ -1,7 +1,12 @@
 TODO:
     - Support more Meetup options
 
-0.023 Wednesday April 08 13:44:36 PDT 2009
+0.024 Sunday April 26 10:50:19 PDT 2009:
+    - Updated minimum version for Data::Dump and JSON
+    - Fixed test function...
+    - Some config default shenaniganery
+
+0.023 Wednesday April 08 13:44:36 PDT 2009:
     - Added use.perl support
     - Image fetching/uploading
 

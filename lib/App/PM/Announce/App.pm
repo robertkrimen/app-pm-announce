@@ -105,7 +105,7 @@ sub run {
             },
             test => sub {
                 my ($context, @arguments) = @_;
-                $app = App::PM::Announce->new(config_default => {
+                $app = App::PM::Announce->new(config_file => undef, config_default => {
                     feed => {
                         meetup => {qw{
                             username robert...krimen@gmail.com
@@ -129,6 +129,7 @@ sub run {
                 my $description = join ' ', @arguments;
                 $description ||= 'Default description';
                 app->announce(
+                    uuid => Data::UUID->new->create_str,
                     title => "$description ($key)",
                     description => "$description ($key)",
                     venue => 920502,

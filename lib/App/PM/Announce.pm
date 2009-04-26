@@ -9,11 +9,11 @@ App::PM::Announce - Announce your PM meeting via Meetup and LinkedIn
 
 =head1 VERSION
 
-Version 0.023
+Version 0.024
 
 =cut
 
-our $VERSION = '0.023';
+our $VERSION = '0.024';
 
 use Moose;
 #with 'MooseX::LogDispatch';
@@ -87,10 +87,14 @@ sub _build_config_default {
 has config => qw/is ro isa HashRef lazy_build 1/;
 sub _build_config {
     my $self = shift;
-    return { Config::General->new(
-        -ConfigFile => $self->config_file,
-        -DefaultConfig => $self->config_default,
-    )->getall };
+    if ($self->config_file) {
+        return { Config::General->new(
+            -ConfigFile => $self->config_file,
+        )->getall };
+    }
+    else {
+        return $self->config_default,
+    }
 }
 
 has log_file => qw/is ro lazy_build 1/;
@@ -195,15 +199,16 @@ sub startup {
     # Gotta do this here
     $self->logger->add( Log::Dispatch::File->new( name => 'file', mode => 'append', min_level => 'info', filename => $self->log_file.'' ) );
 
-    my $config_file = $self->config_file;
-    $self->logger->debug( "config_file = $config_file" );
-
     my $log_file = $self->log_file;
     $self->logger->debug( "log_file = $log_file" );
 
-    unless (-f $config_file) {
-        $self->logger->debug( "Making $config_file stub because it does not exist" );
-        $config_file->openw->print( <<_END_ );
+    my $config_file = $self->config_file;
+    if (defined $config_file) {
+        $self->logger->debug( "config_file = $config_file" );
+
+        unless (-f $config_file) {
+            $self->logger->debug( "Making $config_file stub because it does not exist" );
+            $config_file->openw->print( <<_END_ );
 # vim: set filetype=configgeneral:
 
 # Replace 'An-Example-Group' with the real resource for your Meetup group
@@ -238,6 +243,7 @@ sub startup {
 #</feed>
 
 _END_
+        }
     }
 }
 

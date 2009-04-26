@@ -29,7 +29,7 @@ _END_
     map { my ($pk, $vr) = split m/\s/; requires $pk => $vr || 0 } grep { ! /^\s*#/ } split m/\n/, <<_END_;
 Config::General
 Config::JFDI
-Data::Dump
+Data::Dump 1.14
 Data::UUID
 Date::Manip
 DateTime
@@ -43,7 +43,7 @@ File::HomeDir
 Getopt::Chain
 HTML::TreeBuilder
 HTTP::Request::Common
-JSON
+JSON 2
 Log::Dispatch
 Moose
 #MooseX::LogDispatch
