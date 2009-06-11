@@ -2,7 +2,7 @@ NAME
     App::PM::Announce - Announce your PM meeting via Meetup and LinkedIn
 
 VERSION
-    Version 0.023
+    Version 0.024
 
 SYNOPSIS
         # Initialize and edit the config (only need to do this once)

@@ -8,7 +8,6 @@ use DBI;
 use DBIx::Simple;
 use SQL::Script;
 use JSON;
-use Document::Stembolt;
 my $json = JSON->new->allow_blessed(1)->convert_blessed(1);
 
 has app => qw/is ro isa App::PM::Announce required 1/, handles => [qw/ logger /];

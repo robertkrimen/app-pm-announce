@@ -38,7 +38,7 @@ DBD::SQLite
 DBI
 DBIx::Simple
 DateTime
-Document::Stembolt
+Document::TriPart
 File::HomeDir
 Getopt::Chain
 HTML::TreeBuilder
@@ -46,7 +46,6 @@ HTTP::Request::Common
 JSON 2
 Log::Dispatch
 Moose
-#MooseX::LogDispatch
 Path::Class
 SQL::Script
 Scalar::Util

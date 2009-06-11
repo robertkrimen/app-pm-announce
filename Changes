@@ -1,6 +1,9 @@
 TODO:
     - Support more Meetup options
 
+0.025 Wednesday June 10 17:21:39 PDT 2009:
+    - Use Document::TriPart instead of Document::Stembolt
+
 0.024 Sunday April 26 10:50:19 PDT 2009:
     - Updated minimum version for Data::Dump and JSON
     - Fixed test function...

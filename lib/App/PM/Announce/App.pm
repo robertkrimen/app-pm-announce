@@ -9,7 +9,7 @@ use App::PM::Announce::Util;
 use DateTime;
 use Text::Table;
 use Data::Dump qw/dd pp dump/;
-use Document::Stembolt;
+use Document::TriPart;
 
 my @feeds = @App::PM::Announce::Feed::feeds;
 
@@ -99,7 +99,7 @@ sub run {
                 commands => {
                     edit => sub {
                         my ($context, @arguments) = @_;
-                        Document::Stembolt::_edit_file( app->config_file );
+                        Document::TriPart::_edit_file( app->config_file );
                     },
                 },
             },

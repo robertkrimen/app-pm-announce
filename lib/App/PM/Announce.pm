@@ -9,11 +9,11 @@ App::PM::Announce - Announce your PM meeting via Meetup and LinkedIn
 
 =head1 VERSION
 
-Version 0.024
+Version 0.025
 
 =cut
 
-our $VERSION = '0.024';
+our $VERSION = '0.025';
 
 use Moose;
 #with 'MooseX::LogDispatch';
@@ -24,7 +24,7 @@ use Config::JFDI;
 use Config::General;
 use String::Util qw/trim/;
 use Data::UUID;
-use Document::Stembolt;
+use Document::TriPart;
 use DateTimeX::Easy;
 use Log::Dispatch;
 use Log::Dispatch::Screen;
@@ -404,7 +404,7 @@ use Data::Dump qw/dd pp/;
 sub parse {
     my $self = shift;
 
-    die "Couldn't parse" unless my $document = Document::Stembolt::Content->read(shift);
+    die "Couldn't parse" unless my $document = Document::TriPart->read(shift);
 
     my $datetime = $document->header->{datetime};
     die "You didn't give a datetime" unless $datetime;
